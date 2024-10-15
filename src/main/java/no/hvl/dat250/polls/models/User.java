@@ -7,6 +7,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
 
 /**
  * User
@@ -14,6 +15,7 @@ import jakarta.persistence.OneToMany;
 
 
 @Entity
+@Table(name = "\"user\"") // Escapes the table name "user"
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -72,6 +74,19 @@ public class User {
         this.createdPolls = createdPolls;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        // Compare the id field if it's non-null, as it is the unique identifier
+        if (id != null ? !id.equals(user.id) : user.id != null) return false;
+        // Optionally compare other fields such as username and email
+        if (username != null ? !username.equals(user.username) : user.username != null) return false;
+        return email != null ? email.equals(user.email) : user.email == null;
+    }
 
 }
 

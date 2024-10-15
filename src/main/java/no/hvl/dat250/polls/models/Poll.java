@@ -17,7 +17,7 @@ import jakarta.persistence.OneToMany;
 public class Poll {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String question;
     private Instant publishedAt;
@@ -28,6 +28,8 @@ public class Poll {
 
     @OneToMany(mappedBy = "poll")
     private List<VoteOption> voteOptions; 
+
+    public Poll(){}
 
     public Poll(String question, Instant publishedAt, Instant validUntil){
         this.question = question;
@@ -81,5 +83,27 @@ public class Poll {
 
     public void setVoteOptions(List<VoteOption> voteOptions) {
         this.voteOptions = voteOptions;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Poll poll = (Poll) o;
+
+        // Compare id as the unique identifier
+        if (id != null ? !id.equals(poll.id) : poll.id != null) return false;
+        // Optionally compare other important fields like question, publishedAt, and validUntil
+        if (question != null ? !question.equals(poll.question) : poll.question != null) return false;
+        if (publishedAt != null ? !publishedAt.equals(poll.publishedAt) : poll.publishedAt != null) return false;
+        return validUntil != null ? validUntil.equals(poll.validUntil) : poll.validUntil == null;
+    }
+
+    @Override
+    public String toString(){
+        return "Id: " + this.id + " Question: " + this.question + " Creator: " + this.creator +
+                " VoteOptions: " + this.voteOptions + " Lagd: " + this.publishedAt + " Gyldig til: "
+                + this.validUntil;
     }
 }

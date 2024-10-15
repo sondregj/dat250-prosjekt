@@ -1,7 +1,7 @@
 version: '3.8'
 services:
   polls:
-    image: polls:latest
+    image: polls:0.0.1-SNAPSHOT
     build: .
     ports:
       - "8080:8080"
@@ -12,7 +12,7 @@ services:
       SPRING_DATASOURCE_USERNAME: myuser
       SPRING_DATASOURCE_PASSWORD: mypassword
 
-  db:
+  my-postgres:
     image: postgres:latest
     environment:
       POSTGRES_USER: myuser
