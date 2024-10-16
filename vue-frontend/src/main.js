@@ -1,5 +1,5 @@
 import './assets/main.css'
-import PrimeVue from 'primevue/config';
+import PrimeVue from 'primevue/config'
 import Aura from '@primevue/themes/aura'
 
 import { createApp } from 'vue'
@@ -11,9 +11,9 @@ const app = createApp(App)
 app.use(router)
 
 app.use(PrimeVue, {
-    theme: {
-        preset: Aura
-    }
-});
+  theme: {
+    preset: Aura,
+  },
+})
 
 app.mount('#app')
