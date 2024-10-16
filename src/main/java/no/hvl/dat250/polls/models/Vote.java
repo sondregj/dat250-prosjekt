@@ -22,7 +22,6 @@ public class Vote {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    @Column(precision = 8)
     private Instant publishedAt;
 
     @ManyToOne

@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.transaction.Transactional;
 import no.hvl.dat250.polls.Repository.VoteOptionRepository;
 import no.hvl.dat250.polls.models.VoteOption;
 
@@ -38,6 +39,7 @@ public class VoteOptionService {
      *@param voteOption the voteoption you want to save to the database
      *@return the saved voteoption
      */
+    @Transactional
     public VoteOption addVoteOption(VoteOption voteOption){
         return repo.save(voteOption);
     }
@@ -46,6 +48,7 @@ public class VoteOptionService {
      *@param id the id of the voteoption you want to delete 
      *@return True if the voteoption is deleted, false if not
      */
+    @Transactional
     public boolean deleteVoteOptionById(Long id){
         repo.deleteById(id);
         // TODO when a voteOption is deleted all votes that "voted" for this option is also deleted?
@@ -56,6 +59,7 @@ public class VoteOptionService {
      *@param voteOption the voteoption you want to delete 
      *@return True if the voteoption is deleted, false if not
      */
+    @Transactional
     public boolean deleteVoteOption(VoteOption voteOption){
         repo.delete(voteOption);
         // TODO when a voteOption is deleted all votes that "voted" for this option is also deleted?
@@ -67,6 +71,7 @@ public class VoteOptionService {
      *@voteOption the voteOption object you want to update to
      *@return the updated voteoption or an empty optional if not
      */
+    @Transactional
     public Optional<VoteOption> updateVoteOption(Long id, VoteOption updatedVoteOption){
         Optional<VoteOption> voteOptionOPT = getVoteOptionById(id);
         if (voteOptionOPT.isEmpty()){

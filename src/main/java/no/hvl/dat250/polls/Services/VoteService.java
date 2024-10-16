@@ -45,6 +45,7 @@ public class VoteService {
      *@param vote the vote you want to delete
      *@return True if the vote was deleted, false if not
      */
+    @Transactional
     public boolean deleteVote(Vote vote){
         repo.delete(vote);
         return getVoteById(vote.getId()).isEmpty();
@@ -53,7 +54,7 @@ public class VoteService {
      *@param id the id of the vote you want to delete
      *@return True if the vote was deleted, false if not
      */
-
+    @Transactional
     public boolean deleteVoteById(Long id){
         repo.deleteById(id);
         return getVoteById(id).isEmpty();
@@ -62,6 +63,7 @@ public class VoteService {
      *@param vote the vote you want to delete
      *@return True if the vote was deleted, false if not
      */
+    @Transactional
     public Optional<Vote> updateVote(Long id, Vote updatedVote){
         Optional<Vote> oldVoteOpt = getVoteById(id);
         if (oldVoteOpt.isEmpty()){

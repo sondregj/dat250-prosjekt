@@ -1,9 +1,13 @@
 package no.hvl.dat250.polls.models;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -26,15 +30,16 @@ public class Poll {
     @ManyToOne
     private User creator;
 
-    @OneToMany(mappedBy = "poll")
+    @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<VoteOption> voteOptions; 
 
     public Poll(){}
 
     public Poll(String question, Instant publishedAt, Instant validUntil){
         this.question = question;
-        this.publishedAt = publishedAt;
-        this.validUntil = validUntil;
+        this.publishedAt = publishedAt.truncatedTo(ChronoUnit.SECONDS);
+        this.validUntil = validUntil.truncatedTo(ChronoUnit.SECONDS);
+        this.voteOptions = new ArrayList<>();
     }
 
     public Long getId() {

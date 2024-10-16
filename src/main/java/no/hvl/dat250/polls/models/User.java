@@ -2,7 +2,9 @@ package no.hvl.dat250.polls.models;
 
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -23,10 +25,10 @@ public class User {
     private String username;
     private String email;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Vote> castedVotes;
 
-    @OneToMany(mappedBy = "creator")
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Poll> createdPolls;
 
     public User(){}
@@ -88,6 +90,15 @@ public class User {
         // Optionally compare other fields such as username and email
         if (username != null ? !username.equals(user.username) : user.username != null) return false;
         return email != null ? email.equals(user.email) : user.email == null;
+    }
+
+    @Override
+    public String toString(){
+        return "User{"+
+            "id=" + id +
+            ", username='" + username + '\'' +
+            ", email='" + email + '\'' +
+            '}';
     }
 
 }

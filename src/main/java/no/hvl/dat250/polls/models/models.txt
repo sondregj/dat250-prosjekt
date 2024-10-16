@@ -1,0 +1,399 @@
+package no.hvl.dat250.polls.models;
+
+import java.time.Instant;
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+
+/**
+ * Poll
+ */
+@Entity
+public class Poll {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String question;
+    private Instant publishedAt;
+    private Instant validUntil;
+
+    @ManyToOne
+    private User creator;
+
+    @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<VoteOption> voteOptions; 
+
+    public Poll(){}
+
+    public Poll(String question, Instant publishedAt, Instant validUntil){
+        this.question = question;
+        this.publishedAt = publishedAt;
+        this.validUntil = validUntil;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
+    }
+
+    public Instant getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(Instant publishedAt) {
+        this.publishedAt = publishedAt;
+    }
+
+    public Instant getValidUntil() {
+        return validUntil;
+    }
+
+    public void setValidUntil(Instant validUntil) {
+        this.validUntil = validUntil;
+    }
+
+    public User getCreator() {
+        return creator;
+    }
+
+    public void setCreator(User creator) {
+        this.creator = creator;
+    }
+
+    public List<VoteOption> getVoteOptions() {
+        return voteOptions;
+    }
+
+    public void setVoteOptions(List<VoteOption> voteOptions) {
+        this.voteOptions = voteOptions;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Poll poll = (Poll) o;
+
+        // Compare id as the unique identifier
+        if (id != null ? !id.equals(poll.id) : poll.id != null) return false;
+        // Optionally compare other important fields like question, publishedAt, and validUntil
+        if (question != null ? !question.equals(poll.question) : poll.question != null) return false;
+        if (publishedAt != null ? !publishedAt.equals(poll.publishedAt) : poll.publishedAt != null) return false;
+        return validUntil != null ? validUntil.equals(poll.validUntil) : poll.validUntil == null;
+    }
+
+    @Override
+    public String toString(){
+        return "Id: " + this.id + " Question: " + this.question + " Creator: " + this.creator +
+                " VoteOptions: " + this.voteOptions + " Lagd: " + this.publishedAt + " Gyldig til: "
+                + this.validUntil;
+    }
+}
+package no.hvl.dat250.polls.models;
+
+import java.util.List;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+/**
+ * User
+ */
+
+
+@Entity
+@Table(name = "\"user\"") // Escapes the table name "user"
+public class User {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String username;
+    private String email;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Vote> castedVotes;
+
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.PERSIST)
+    private List<Poll> createdPolls;
+
+    public User(){}
+
+    public User(String username, String email){
+        this.username = username;
+        this.email = email;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public List<Vote> getCastedVotes() {
+        return castedVotes;
+    }
+
+    public void setCastedVotes(List<Vote> castedVotes) {
+        this.castedVotes = castedVotes;
+    }
+
+    public List<Poll> getCreatedPolls() {
+        return createdPolls;
+    }
+
+    public void setCreatedPolls(List<Poll> createdPolls) {
+        this.createdPolls = createdPolls;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        // Compare the id field if it's non-null, as it is the unique identifier
+        if (id != null ? !id.equals(user.id) : user.id != null) return false;
+        // Optionally compare other fields such as username and email
+        if (username != null ? !username.equals(user.username) : user.username != null) return false;
+        return email != null ? email.equals(user.email) : user.email == null;
+    }
+
+}
+
+package no.hvl.dat250.polls.models;
+
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.Objects;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
+/**
+ * Vote
+ */
+@Entity
+public class Vote {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    @Column(precision = 8)
+    private Instant publishedAt;
+
+    @ManyToOne
+    @JoinColumn(name="user_id")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "vote_option_id")
+    private VoteOption voteOption;
+
+    public Vote(Instant publishedAt){
+        this.publishedAt = publishedAt.atZone(ZoneOffset.UTC).toInstant().truncatedTo(ChronoUnit.SECONDS);
+    }
+
+    public Vote() {}
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Instant getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(Instant publishedAt) {
+        this.publishedAt = publishedAt.truncatedTo(ChronoUnit.SECONDS);
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public VoteOption getVoteOption() {
+        return voteOption;
+    }
+
+    public void setVoteOption(VoteOption voteOption) {
+        this.voteOption = voteOption;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vote vote = (Vote) o;
+        return Objects.equals(id, vote.id) &&
+               Objects.equals(publishedAt, vote.publishedAt) &&
+               Objects.equals(user, vote.user) &&
+               Objects.equals(voteOption, vote.voteOption);
+    }
+
+    @Override
+    public String toString() {
+        return "Vote{" +
+            "id=" + id +
+            ", publishedAt=" + publishedAt +
+            ", user=" + (user != null ? user.getId() : "null") +
+            ", voteOption=" + (voteOption != null ? voteOption.getId() : "null") +
+            '}';
+    }
+}
+package no.hvl.dat250.polls.models;
+
+import java.util.List;
+import java.util.Objects;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
+
+/**
+ * VoteOption
+ */
+@Entity
+public class VoteOption {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private String caption; 
+    private int presentationOrder;
+
+    @OneToMany(mappedBy = "voteOption", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Vote> votes;
+
+    @ManyToOne
+    private Poll poll;
+
+
+    public VoteOption(){}
+
+    public VoteOption(String caption, int presentationOrder){
+        this.caption = caption;
+        this.presentationOrder = presentationOrder;
+    }
+
+
+    public Long getId() {
+        return id;
+    }
+
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+
+    public String getCaption() {
+        return caption;
+    }
+
+
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
+
+
+    public int getPresentationOrder() {
+        return presentationOrder;
+    }
+
+
+    public void setPresentationOrder(int presentationOrder) {
+        this.presentationOrder = presentationOrder;
+    }
+
+
+    public List<Vote> getVotes() {
+        return votes;
+    }
+
+
+    public void setVotes(List<Vote> votes) {
+        this.votes = votes;
+    }
+
+
+    public Poll getPoll() {
+        return poll;
+    }
+
+
+    public void setPoll(Poll poll) {
+        this.poll = poll;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VoteOption that = (VoteOption) o;
+        return presentationOrder == that.presentationOrder &&
+            Objects.equals(id, that.id) &&
+            Objects.equals(caption, that.caption);
+    }
+}

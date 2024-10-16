@@ -3,6 +3,7 @@ package no.hvl.dat250.polls.models;
 import java.util.List;
 import java.util.Objects;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,12 +24,11 @@ public class VoteOption {
     private String caption; 
     private int presentationOrder;
 
-    @OneToMany(mappedBy = "voteOption")
+    @OneToMany(mappedBy = "voteOption", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Vote> votes;
 
     @ManyToOne
     private Poll poll;
-
 
     public VoteOption(){}
 

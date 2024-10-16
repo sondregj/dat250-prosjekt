@@ -18,6 +18,7 @@ import no.hvl.dat250.polls.models.User;
 public class UserService {
 
     @Autowired UserRepository repo;
+    @Autowired VoteService service;
     
     /**
      *@return A list containing all Users
