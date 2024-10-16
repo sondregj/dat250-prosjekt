@@ -40,7 +40,7 @@ public class UserServiceUnitTest {
         assertTrue(createdUser.getUsername().equals("Test"));
         assertTrue(createdUser.getEmail().equals("Test@email.com"));
     }
-
+    
     @Test
     public void testGetUserById(){
         User createdUser = new User("Test", "Test@email.com");
