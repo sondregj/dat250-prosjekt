@@ -18,7 +18,7 @@ import jakarta.persistence.Table;
 @Table(name = "\"user\"") // Escapes the table name "user"
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String username;
     private String email;
@@ -28,6 +28,8 @@ public class User {
 
     @OneToMany(mappedBy = "creator")
     private List<Poll> createdPolls;
+
+    public User(){}
 
     public User(String username, String email){
         this.username = username;

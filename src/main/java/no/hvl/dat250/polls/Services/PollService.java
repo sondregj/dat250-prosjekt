@@ -12,6 +12,7 @@ import no.hvl.dat250.polls.models.Poll;
 
 /**
  * PollService
+ * @author Jonas Vestbø
  */
 @Service
 public class PollService {

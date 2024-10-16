@@ -22,7 +22,7 @@ import no.hvl.dat250.polls.models.Poll;
  */
 @SpringBootTest
 @ActiveProfiles("test")
-public class PollUnitServiceTests {
+public class PollServiceUnitTests {
 
     @Autowired PollService pollService;
     @Autowired PollRepository repo;
