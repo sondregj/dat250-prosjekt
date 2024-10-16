@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 services:
   polls:
     image: polls:0.0.1-SNAPSHOT
@@ -6,13 +6,13 @@ services:
     ports:
       - "8080:8080"
     depends_on:
-      - my-postgres
+      - postgres
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/mydb
       SPRING_DATASOURCE_USERNAME: myuser
       SPRING_DATASOURCE_PASSWORD: mypassword
 
-  my-postgres:
+  postgres:
     image: postgres:latest
     environment:
       POSTGRES_USER: myuser
@@ -24,4 +24,3 @@ services:
       - postgres-data:/var/lib/postgresql/data
 volumes:
   postgres-data:
-
