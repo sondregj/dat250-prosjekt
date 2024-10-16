@@ -12,7 +12,7 @@ const props = defineProps(['message', 'showEmail', 'buttonText'])
 
 <template>
   <div class="form">
-    <h3 class="greeting">{{props.message}}</h3>
+    <h3 class="greeting">{{ props.message }}</h3>
 
     <div class="input1">
       <FloatLabel>
@@ -21,14 +21,14 @@ const props = defineProps(['message', 'showEmail', 'buttonText'])
       </FloatLabel>
     </div>
     <div class="input3" v-if="props.showEmail === true">
-      <FloatLabel >
+      <FloatLabel>
         <InputText id="email" v-model="email" type="email" />
         <label for="email">Email</label>
       </FloatLabel>
     </div>
     <div class="input2">
       <FloatLabel>
-        <Password v-model="password" :feedback="false"/>
+        <Password v-model="password" :feedback="false" />
         <label for="password">Password</label>
       </FloatLabel>
     </div>
@@ -65,7 +65,6 @@ div.form {
 div.button {
   padding-top: 15px;
 }
-
 
 h3.greeting {
   padding-bottom: 10px;
