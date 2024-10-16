@@ -1,6 +1,7 @@
 package no.hvl.dat250.polls.models;
 
 import java.util.List;
+import java.util.Objects;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -16,7 +17,7 @@ import jakarta.persistence.ManyToOne;
 public class VoteOption {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     private String caption; 
@@ -29,58 +30,70 @@ public class VoteOption {
     private Poll poll;
 
 
-	public VoteOption(String caption, int presentationOrder){
+    public VoteOption(){}
+
+    public VoteOption(String caption, int presentationOrder){
         this.caption = caption;
         this.presentationOrder = presentationOrder;
     }
 
 
-	public Long getId() {
-		return id;
-	}
+    public Long getId() {
+        return id;
+    }
 
 
-	public void setId(Long id) {
-		this.id = id;
-	}
+    public void setId(Long id) {
+        this.id = id;
+    }
 
 
-  public String getCaption() {
-      return caption;
-  }
+    public String getCaption() {
+        return caption;
+    }
 
 
-  public void setCaption(String caption) {
-      this.caption = caption;
-  }
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
 
 
-  public int getPresentationOrder() {
-      return presentationOrder;
-  }
+    public int getPresentationOrder() {
+        return presentationOrder;
+    }
 
 
-  public void setPresentationOrder(int presentationOrder) {
-      this.presentationOrder = presentationOrder;
-  }
+    public void setPresentationOrder(int presentationOrder) {
+        this.presentationOrder = presentationOrder;
+    }
 
 
-  public List<Vote> getVotes() {
-      return votes;
-  }
+    public List<Vote> getVotes() {
+        return votes;
+    }
 
 
-  public void setVotes(List<Vote> votes) {
-      this.votes = votes;
-  }
+    public void setVotes(List<Vote> votes) {
+        this.votes = votes;
+    }
 
 
-  public Poll getPoll() {
-      return poll;
-  }
+    public Poll getPoll() {
+        return poll;
+    }
 
 
-  public void setPoll(Poll poll) {
-      this.poll = poll;
-  }
+    public void setPoll(Poll poll) {
+        this.poll = poll;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VoteOption that = (VoteOption) o;
+        return presentationOrder == that.presentationOrder &&
+            Objects.equals(id, that.id) &&
+            Objects.equals(caption, that.caption);
+    }
 }
