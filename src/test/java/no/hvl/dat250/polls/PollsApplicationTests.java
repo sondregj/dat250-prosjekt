@@ -8,6 +8,7 @@ class PollsApplicationTests {
 
 	@Test
 	void contextLoads() {
+	    System.out.println("Done");
 	}
 
 }
