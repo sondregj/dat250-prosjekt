@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import no.hvl.dat250.polls.Repository.UserRepository;
+import no.hvl.dat250.polls.models.Poll;
 import no.hvl.dat250.polls.models.User;
+import no.hvl.dat250.polls.models.Vote;
 
 /**
  * UserService
@@ -66,17 +68,44 @@ public class UserService {
      */
 
     @Transactional
-    public Optional<User> updateUser(Long id, User updatedUser){
+    public Optional<User> updateUser(Long id, User updatedUser) {
         Optional<User> oldUserOpt = getUserById(id);
-        if (oldUserOpt.isEmpty()){
+        if (oldUserOpt.isEmpty()) {
             return Optional.empty();
         }
+
         User oldUser = oldUserOpt.get();
-        
+
         oldUser.setEmail(updatedUser.getEmail());
         oldUser.setUsername(updatedUser.getUsername());
-        // TODO add possibility to add votes and createdpolls as well
-        // TODO if so also add so that the removed votes and created polls are deleted?
+
+        // Handle createdPolls
+        List<Poll> pollsToRemove = oldUser.getCreatedPolls().stream()
+            .filter(p -> !updatedUser.getCreatedPolls().contains(p))
+            .toList(); 
+
+        oldUser.getCreatedPolls().removeAll(pollsToRemove);  
+
+        updatedUser.getCreatedPolls().forEach(p -> {
+            if (!oldUser.getCreatedPolls().contains(p)) {
+                p.setCreator(oldUser);  
+                oldUser.getCreatedPolls().add(p);
+            }
+        });
+
+        // Handle castedVotes
+        List<Vote> votesToRemove = oldUser.getCastedVotes().stream()
+            .filter(v -> !updatedUser.getCastedVotes().contains(v))
+            .toList();  
+
+        oldUser.getCastedVotes().removeAll(votesToRemove);  // Remove them
+
+        updatedUser.getCastedVotes().forEach(v -> {
+            if (!oldUser.getCastedVotes().contains(v)) {
+                v.setUser(oldUser);  // Ensure relationship consistency
+                oldUser.getCastedVotes().add(v);
+            }
+        });
 
         return Optional.of(repo.save(oldUser));
     }

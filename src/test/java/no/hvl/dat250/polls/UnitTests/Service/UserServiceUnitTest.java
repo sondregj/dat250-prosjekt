@@ -225,6 +225,10 @@ public class UserServiceUnitTest {
         assertTrue(updatedUserOPT.isPresent());
         
         updatedUser = updatedUserOPT.get();
+        poll1 = updatedUser.getCreatedPolls().get(0);
+        poll3 = updatedUser.getCreatedPolls().get(1);
+        vote1 = updatedUser.getCastedVotes().get(0);
+        vote3 = updatedUser.getCastedVotes().get(1);
         //Check that the id was not changed
         assertTrue(updatedUser.getId().equals(createdUser.getId()));
         //Retrieve the user from the database
@@ -236,6 +240,8 @@ public class UserServiceUnitTest {
         //Check that the correct Polls has been saved for the user
         assertTrue(retrievedUser.getCreatedPolls().get(0).equals(updatedUser.getCreatedPolls().get(0)));
         assertTrue(retrievedUser.getCreatedPolls().get(1).equals(updatedUser.getCreatedPolls().get(1)));
+        assertTrue(retrievedUser.getCreatedPolls().get(0).getQuestion().equals("Q1"));
+        assertTrue(retrievedUser.getCreatedPolls().get(1).getQuestion().equals("Q3"));
         assertTrue(retrievedUser.getCreatedPolls().size() == 2);
         assertTrue(updatedUser.getCreatedPolls().size() == 2);
 
@@ -247,14 +253,19 @@ public class UserServiceUnitTest {
 
         //Check that the Polls not in the updated users list was deleted
         List<Poll> retrievedPolls = pService.getAllPolls();
-        assertTrue(retrievedPolls.get(0).equals(retrievedUser.getCreatedPolls().get(0)));
-        assertTrue(retrievedPolls.get(1).equals(retrievedUser.getCreatedPolls().get(1)));
+        assertTrue(retrievedPolls.get(0).getQuestion().equals("Q1"));
+        assertTrue(retrievedPolls.get(1).getQuestion().equals("Q3"));
+        assertTrue(retrievedPolls.contains(poll1));
+        assertTrue(retrievedPolls.contains(poll3));
         assertTrue(retrievedPolls.size() == 2);
 
         //Check that the Votes not in the updated votes list was deleted
         List<Vote> retrievedVotes = vService.getAllVotes();
         assertTrue(retrievedVotes.get(0).equals(retrievedUser.getCastedVotes().get(0)));
         assertTrue(retrievedVotes.get(1).equals(retrievedUser.getCastedVotes().get(1)));
+        assertTrue(retrievedVotes.contains(vote1));
+        assertTrue(retrievedVotes.contains(vote3));
+        assertTrue(!retrievedVotes.contains(vote2));
         assertTrue(retrievedVotes.size() == 2);
     }
 }
