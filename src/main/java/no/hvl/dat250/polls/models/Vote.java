@@ -1,7 +1,11 @@
 package no.hvl.dat250.polls.models;
 
 import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -16,21 +20,24 @@ import jakarta.persistence.ManyToOne;
 public class Vote {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+    @Column(precision = 8)
     private Instant publishedAt;
 
     @ManyToOne
-    @JoinColumn(name="user_id", nullable = false)
+    @JoinColumn(name="user_id")
     private User user;
 
     @ManyToOne
-    @JoinColumn(name = "vote_option_id", nullable = false)
+    @JoinColumn(name = "vote_option_id")
     private VoteOption voteOption;
 
     public Vote(Instant publishedAt){
-        this.publishedAt = publishedAt;
+        this.publishedAt = publishedAt.atZone(ZoneOffset.UTC).toInstant().truncatedTo(ChronoUnit.SECONDS);
     }
+
+    public Vote() {}
 
     public Long getId() {
         return id;
@@ -45,7 +52,7 @@ public class Vote {
     }
 
     public void setPublishedAt(Instant publishedAt) {
-        this.publishedAt = publishedAt;
+        this.publishedAt = publishedAt.truncatedTo(ChronoUnit.SECONDS);
     }
 
     public User getUser() {
@@ -62,5 +69,26 @@ public class Vote {
 
     public void setVoteOption(VoteOption voteOption) {
         this.voteOption = voteOption;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vote vote = (Vote) o;
+        return Objects.equals(id, vote.id) &&
+               Objects.equals(publishedAt, vote.publishedAt) &&
+               Objects.equals(user, vote.user) &&
+               Objects.equals(voteOption, vote.voteOption);
+    }
+
+    @Override
+    public String toString() {
+        return "Vote{" +
+            "id=" + id +
+            ", publishedAt=" + publishedAt +
+            ", user=" + (user != null ? user.getId() : "null") +
+            ", voteOption=" + (voteOption != null ? voteOption.getId() : "null") +
+            '}';
     }
 }

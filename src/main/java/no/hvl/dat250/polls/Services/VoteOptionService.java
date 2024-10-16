@@ -48,6 +48,7 @@ public class VoteOptionService {
      */
     public boolean deleteVoteOptionById(Long id){
         repo.deleteById(id);
+        // TODO when a voteOption is deleted all votes that "voted" for this option is also deleted?
         return repo.findById(id).isEmpty();
     }
 
@@ -57,6 +58,7 @@ public class VoteOptionService {
      */
     public boolean deleteVoteOption(VoteOption voteOption){
         repo.delete(voteOption);
+        // TODO when a voteOption is deleted all votes that "voted" for this option is also deleted?
         return repo.findById(voteOption.getId()).isEmpty();
     }
 
