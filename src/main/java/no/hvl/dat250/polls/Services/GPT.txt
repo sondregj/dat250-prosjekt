@@ -1,0 +1,347 @@
+package no.hvl.dat250.polls.Services;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
+import no.hvl.dat250.polls.Repository.PollRepository;
+import no.hvl.dat250.polls.models.Poll;
+
+/**
+ * PollService
+ * @author Jonas Vestbø
+ */
+@Service
+public class PollService {
+
+   @Autowired
+   private PollRepository repo;
+
+   /**
+    * @param id The id of the Poll you want to retrieve
+    * @return The poll with the given id as an optional or an empty Optional if no poll exists
+    */
+   public Optional<Poll> getPollById(Long id){
+       return repo.findById(id);
+   }
+
+   /**
+    * @return Every poll in the database or an empty list if there are none
+    */
+   public List<Poll> getAllPolls(){
+       return repo.findAll();
+   }
+
+   /**
+    * @param id The id of the poll you want to update
+    * @param updatedPoll the poll object you want to update to
+    * @return the updated Poll or an empty Optional if the Poll could not be updated
+    */
+
+   @Transactional
+   public Optional<Poll> updatePoll(Long id, Poll updatedPoll){
+       Optional<Poll> retrievedPollOpt = repo.findById(id);
+
+       if (retrievedPollOpt.isEmpty()){
+           return Optional.empty();
+       }
+
+       Poll retrievedPoll = retrievedPollOpt.get();
+
+       retrievedPoll.setVoteOptions(updatedPoll.getVoteOptions());
+       retrievedPoll.setPublishedAt(updatedPoll.getPublishedAt());
+       retrievedPoll.setValidUntil(updatedPoll.getValidUntil());
+       retrievedPoll.setQuestion(updatedPoll.getQuestion());
+
+       return Optional.of(repo.save(retrievedPoll));
+   }
+
+   /**
+    *@param poll the poll that you want to delete
+    *@return True if the poll was deleted, false if not
+    */
+   @Transactional
+   public boolean deletePoll(Poll poll){
+       repo.delete(poll);
+       return repo.findById(poll.getId()).isEmpty();
+   }
+   /**
+    *@param id the id of the poll that you want to delete
+    *@return True if the poll was deleted, false if not
+    */
+   @Transactional
+   public boolean deletePollById(Long id){
+       repo.deleteById(id);
+       return repo.findById(id).isEmpty();
+   }
+   /**
+    * @param poll the poll that you want to add to the database
+    * @returns the added poll or throws an exception if it was
+    * not successfull
+    */
+   @Transactional
+   public Poll addPoll(Poll poll){
+        Poll savedPoll = repo.save(poll);
+        return savedPoll;
+   }
+}
+package no.hvl.dat250.polls.Services;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
+import no.hvl.dat250.polls.Repository.UserRepository;
+import no.hvl.dat250.polls.models.User;
+
+/**
+ * UserService
+ * @author Jonas Vestbø
+ */
+@Service
+public class UserService {
+
+    @Autowired UserRepository repo;
+    @Autowired VoteService service;
+    
+    /**
+     *@return A list containing all Users
+     */
+    public List<User> getAllUsers(){
+        return repo.findAll();
+    }
+
+    /**
+     *@param id The id of the user you want to retrieve 
+     *@return An optional containing the user with the given id or an empty optional if it does 
+     * not exist
+     */
+    public Optional<User> getUserById(Long id){
+        return repo.findById(id);
+    }
+
+    /**
+     * @param id The id of the user you want to delete 
+     * @return True if the user was deleted, False if not
+     */
+    @Transactional
+    public boolean deleteUserById(Long id){
+        // TODO add a feature that when a user is deleted his votes are deleted as well?
+        repo.deleteById(id);
+        return repo.findById(id).isEmpty();
+    }
+
+    /**
+     * @param user The user you want to delete 
+     * @return True if the user was deleted, False if not
+     */
+    
+    @Transactional
+    public boolean deleteUser(User user){
+        // TODO add a feature that when a user is deleted his votes are deleted as well?
+        repo.delete(user);
+        return repo.findById(user.getId()).isEmpty();
+    }
+
+    /**
+     *@param id The id of the user you want to update 
+     *@param updatedUser the User object you want to update to
+     *@return The updateduser or an empty optional if the user could not be updated
+     */
+
+    @Transactional
+    public Optional<User> updateUser(Long id, User updatedUser){
+        Optional<User> oldUserOpt = getUserById(id);
+        if (oldUserOpt.isEmpty()){
+            return Optional.empty();
+        }
+        User oldUser = oldUserOpt.get();
+        
+        oldUser.setEmail(updatedUser.getEmail());
+        oldUser.setUsername(updatedUser.getUsername());
+        // TODO add possibility to add votes and createdpolls as well
+        // TODO if so also add so that the removed votes and created polls are deleted?
+
+        return Optional.of(repo.save(oldUser));
+    }
+
+    /**
+     * @param user the User you want to save to the database 
+     * @return the saved User or throws an error if the User could not be saved
+     */
+
+    @Transactional
+    public User addUser(User user){
+        return repo.save(user);
+    }
+}
+package no.hvl.dat250.polls.Services;
+
+import java.util.List;
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import no.hvl.dat250.polls.Repository.VoteOptionRepository;
+import no.hvl.dat250.polls.models.VoteOption;
+
+/**
+ * VoteOption
+ * @author Jonas Vestbø
+ */
+
+@Service
+public class VoteOptionService {
+    
+    @Autowired VoteOptionRepository repo;
+
+    /**
+     *@param id the id of the voteoption you want to retrieve 
+     *@return the voteoption with the id or an empty optional if a user with id does not exist
+     */
+    public Optional<VoteOption> getVoteOptionById(Long id){
+        return repo.findById(id);
+    }
+
+    /**
+     * @return a list of all voteoptions
+     */
+    public List<VoteOption> getAllVoteOptions(){
+        return repo.findAll();
+    }
+
+    /**
+     *@param voteOption the voteoption you want to save to the database
+     *@return the saved voteoption
+     */
+    public VoteOption addVoteOption(VoteOption voteOption){
+        return repo.save(voteOption);
+    }
+
+    /**
+     *@param id the id of the voteoption you want to delete 
+     *@return True if the voteoption is deleted, false if not
+     */
+    public boolean deleteVoteOptionById(Long id){
+        repo.deleteById(id);
+        // TODO when a voteOption is deleted all votes that "voted" for this option is also deleted?
+        return repo.findById(id).isEmpty();
+    }
+
+    /**
+     *@param voteOption the voteoption you want to delete 
+     *@return True if the voteoption is deleted, false if not
+     */
+    public boolean deleteVoteOption(VoteOption voteOption){
+        repo.delete(voteOption);
+        // TODO when a voteOption is deleted all votes that "voted" for this option is also deleted?
+        return repo.findById(voteOption.getId()).isEmpty();
+    }
+
+    /**
+     *@param id the id of the voteoption you want to update 
+     *@voteOption the voteOption object you want to update to
+     *@return the updated voteoption or an empty optional if not
+     */
+    public Optional<VoteOption> updateVoteOption(Long id, VoteOption updatedVoteOption){
+        Optional<VoteOption> voteOptionOPT = getVoteOptionById(id);
+        if (voteOptionOPT.isEmpty()){
+            return Optional.empty();
+        }
+        VoteOption voteOption = voteOptionOPT.get();
+
+        voteOption.setCaption(updatedVoteOption.getCaption());
+        voteOption.setPresentationOrder(updatedVoteOption.getPresentationOrder());
+        // TODO add possibility to add polls and votes as well
+        // TODO if so also add so that the removed votes and created votes are deleted/added?
+        return Optional.of(repo.save(voteOption));
+    }
+}
+package no.hvl.dat250.polls.Services;
+
+import java.util.List;
+import java.util.Optional;
+
+import no.hvl.dat250.polls.models.Vote;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+import jakarta.transaction.Transactional;
+import no.hvl.dat250.polls.Repository.VoteRepository;
+
+/**
+ * VoteService
+ * @author Jonas Vestbø
+ */
+@Service
+public class VoteService {
+
+    @Autowired VoteRepository repo;
+
+    public List<Vote> getAllVotes(){
+        return repo.findAll();
+    }
+
+    /**
+     *@param id The id of the user you want to retrieve 
+     *@return the retrieved user or an empty optional if no user could be found
+     */
+    public Optional<Vote> getVoteById(Long id){
+        return repo.findById(id);
+    }
+
+    /**
+     *@param vote the vote object you want to save to the database
+     *@return the saved vote
+     */
+    @Transactional
+    public Vote addVote(Vote vote){
+        return repo.save(vote);
+    }
+
+    /**
+     *@param vote the vote you want to delete
+     *@return True if the vote was deleted, false if not
+     */
+    public boolean deleteVote(Vote vote){
+        repo.delete(vote);
+        return getVoteById(vote.getId()).isEmpty();
+    }
+    /**
+     *@param id the id of the vote you want to delete
+     *@return True if the vote was deleted, false if not
+     */
+
+    public boolean deleteVoteById(Long id){
+        repo.deleteById(id);
+        return getVoteById(id).isEmpty();
+    }
+    /**
+     *@param vote the vote you want to delete
+     *@return True if the vote was deleted, false if not
+     */
+    public Optional<Vote> updateVote(Long id, Vote updatedVote){
+        Optional<Vote> oldVoteOpt = getVoteById(id);
+        if (oldVoteOpt.isEmpty()){
+            return oldVoteOpt;
+        }
+        Vote oldVote = oldVoteOpt.get();
+
+        oldVote.setVoteOption(updatedVote.getVoteOption());
+        oldVote.setPublishedAt(updatedVote.getPublishedAt());
+        //TODO add functionality to change caster? and poll?
+        //if so also have to change saved user and poll elements
+
+        return Optional.of(repo.save(oldVote));
+    }
+
+}
+    
