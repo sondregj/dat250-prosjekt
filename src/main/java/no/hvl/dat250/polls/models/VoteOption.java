@@ -1,10 +1,12 @@
 package no.hvl.dat250.polls.models;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -24,7 +26,7 @@ public class VoteOption {
     private String caption; 
     private int presentationOrder;
 
-    @OneToMany(mappedBy = "voteOption", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "voteOption", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Vote> votes;
 
     @ManyToOne
@@ -35,6 +37,7 @@ public class VoteOption {
     public VoteOption(String caption, int presentationOrder){
         this.caption = caption;
         this.presentationOrder = presentationOrder;
+        this.votes = new ArrayList<>();
     }
 
 

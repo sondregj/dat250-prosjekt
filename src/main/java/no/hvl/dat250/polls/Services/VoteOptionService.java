@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import no.hvl.dat250.polls.Repository.VoteOptionRepository;
+import no.hvl.dat250.polls.models.Vote;
 import no.hvl.dat250.polls.models.VoteOption;
 
 /**
@@ -62,7 +63,6 @@ public class VoteOptionService {
     @Transactional
     public boolean deleteVoteOption(VoteOption voteOption){
         repo.delete(voteOption);
-        // TODO when a voteOption is deleted all votes that "voted" for this option is also deleted?
         return repo.findById(voteOption.getId()).isEmpty();
     }
 
@@ -81,8 +81,11 @@ public class VoteOptionService {
 
         voteOption.setCaption(updatedVoteOption.getCaption());
         voteOption.setPresentationOrder(updatedVoteOption.getPresentationOrder());
-        // TODO add possibility to add polls and votes as well
-        // TODO if so also add so that the removed votes and created votes are deleted/added?
+
+        if (updatedVoteOption.getPoll() != null){
+            voteOption.setPoll(updatedVoteOption.getPoll());
+        }
+
         return Optional.of(repo.save(voteOption));
     }
 }

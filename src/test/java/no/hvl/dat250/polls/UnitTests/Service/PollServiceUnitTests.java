@@ -164,7 +164,7 @@ public class PollServiceUnitTests {
         Optional<Poll> retrievedUpdated = pollService.updatePoll(poll1.getId(), updatedPoll);
         updatedPoll = retrievedUpdated.get();
         option1 = updatedPoll.getVoteOptions().get(0);
-        option3 = updatedPoll.getVoteOptions().get(1);
+        option3 = updatedPoll.getVoteOptions().get(0);
 
         // Retrieve the poll with the id from the database
         Poll retrievedById = pollService.getPollById(retrievedUpdated.get().getId()).get();
