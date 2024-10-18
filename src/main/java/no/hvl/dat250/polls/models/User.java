@@ -24,6 +24,7 @@ public class User {
     private Long id;
     private String username;
     private String email;
+    private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Vote> castedVotes;
@@ -78,6 +79,8 @@ public class User {
         this.createdPolls = createdPolls;
     }
 
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -92,6 +95,8 @@ public class User {
         return email != null ? email.equals(user.email) : user.email == null;
     }
 
+
+
     @Override
     public String toString(){
         return "User{"+
@@ -101,5 +106,11 @@ public class User {
             '}';
     }
 
-}
+	public String getPassword() {
+		return password;
+	}
 
+	public void setPassword(String password) {
+		this.password = password;
+	}
+}
