@@ -1,11 +1,18 @@
-<script setup>
-
-</script>
+<script setup></script>
 
 <template>
-<h1>Hello World</h1>
+  <header>
+    <div>
+      <nav>
+        <RouterLink to="/">Home</RouterLink>
+        <RouterLink to="/login">Login</RouterLink>
+        <RouterLink to="/signup">Signup</RouterLink>
+      </nav>
+    </div>
+  </header>
+  <main>
+    <RouterView />
+  </main>
 </template>
 
-<style scoped>
-
-</style>
+<style scoped></style>

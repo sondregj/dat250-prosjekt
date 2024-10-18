@@ -9,9 +9,11 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 import no.hvl.dat250.polls.Repository.PollRepository;
 import no.hvl.dat250.polls.models.Poll;
+import no.hvl.dat250.polls.models.VoteOption;
 
 /**
  * PollService
+ * @author Jonas Vestbø
  */
 @Service
 public class PollService {
@@ -50,10 +52,24 @@ public class PollService {
 
        Poll retrievedPoll = retrievedPollOpt.get();
 
-       retrievedPoll.setVoteOptions(updatedPoll.getVoteOptions());
        retrievedPoll.setPublishedAt(updatedPoll.getPublishedAt());
        retrievedPoll.setValidUntil(updatedPoll.getValidUntil());
-       retrievedPoll.setQuestion(updatedPoll.getQuestion());
+
+       //Find all the options that should be removed
+       List<VoteOption> removedVoteOptions = retrievedPoll.getVoteOptions().stream()
+           .filter(p -> !updatedPoll.getVoteOptions().contains(p))
+           .toList();
+
+       //Remove them
+       retrievedPoll.getVoteOptions().removeAll(removedVoteOptions);
+
+       //Add all noexisting values
+        updatedPoll.getVoteOptions().forEach(p -> {
+            if (!retrievedPoll.getVoteOptions().contains(p)) {
+                p.setPoll(retrievedPoll);
+                retrievedPoll.getVoteOptions().add(p);
+            }
+        });
 
        return Optional.of(repo.save(retrievedPoll));
    }

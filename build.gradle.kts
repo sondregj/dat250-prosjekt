@@ -36,4 +36,5 @@ tasks.withType<Test> {
         exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
         showStandardStreams = true
     }
+    systemProperty("user.timezone", "UTC")
 }
