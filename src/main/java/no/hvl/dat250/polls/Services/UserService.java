@@ -44,7 +44,6 @@ public class UserService {
      */
     @Transactional
     public boolean deleteUserById(Long id){
-        // TODO add a feature that when a user is deleted his votes are deleted as well?
         repo.deleteById(id);
         return repo.findById(id).isEmpty();
     }
@@ -56,7 +55,6 @@ public class UserService {
     
     @Transactional
     public boolean deleteUser(User user){
-        // TODO add a feature that when a user is deleted his votes are deleted as well?
         repo.delete(user);
         return repo.findById(user.getId()).isEmpty();
     }
