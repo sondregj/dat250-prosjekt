@@ -1,14 +1,14 @@
 package no.hvl.dat250.polls.config;
 
+import jakarta.servlet.http.HttpServletResponse;
+import no.hvl.dat250.polls.Services.CustomUserDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -32,6 +32,22 @@ public class SecurityConfig {
                     .requestMatchers("/**")
                     .permitAll()
             )
+            .formLogin(form ->
+                form
+                    .loginProcessingUrl("/api/auth/login")
+                    .successHandler((request, response, authentication) -> {
+                        response.setStatus(HttpServletResponse.SC_OK);
+                        response
+                            .getWriter()
+                            .write("{\"message\": \"Login successful\"}");
+                    })
+                    .failureHandler((request, response, exception) -> {
+                        response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                        response
+                            .getWriter()
+                            .write("{\"error\": \"Login failed\"}");
+                    })
+            )
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.disable());
         return http.build();
@@ -42,29 +58,14 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth)
-        throws Exception {
+    @Bean
+    @Primary
+    public AuthenticationManagerBuilder configureGlobal(
+        AuthenticationManagerBuilder auth
+    ) throws Exception {
         auth
             .userDetailsService(userDetailsService)
             .passwordEncoder(passwordEncoder());
+        return auth;
     }
-}
-
-class CustomUserDetailsService implements UserDetailsService {
-
-    // @Autowired
-    // private UserRepository userRepository;
-
-    public UserDetails loadUserByUsername(String username)
-        throws UsernameNotFoundException {
-        // User user = userRepository.findByUsername(username);
-        // if (user == null) {
-        //     throw new UsernameNotFoundException("User not found");
-        // }
-        // return user;
-        return null;
-    }
-    // @Override
-    // public UserDetails loadUserByUsername(String username
 }
