@@ -9,6 +9,17 @@ const username = defineModel('username')
 const password = defineModel('password')
 const email = defineModel('email')
 const props = defineProps(['message', 'signup', 'buttonText'])
+
+const resetForm = () => {
+  username.value = ''
+  password.value = ''
+  email.value = ''
+}
+
+const handleSubmit = async () => {
+  await createNewUser(username.value, password.value, email.value)
+  resetForm()
+}
 </script>
 
 <template>
@@ -37,7 +48,7 @@ const props = defineProps(['message', 'signup', 'buttonText'])
       <Button
         :label="props.buttonText"
         v-if="props.signup === true"
-        @click="createNewUser(username, password, email)"
+        @click="handleSubmit"
       ></Button>
       <Button :label="props.buttonText" v-else></Button>
     </div>
