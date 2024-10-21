@@ -61,6 +61,12 @@ public class VoteOptionsController {
         if (!service.deleteVoteOptionById(id)){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        Optional<VoteOption> retrievedOption2 = service.getVoteOptionById(id);
+        if (retrievedOption2.isEmpty()){
+            System.out.println("Deleted");
+        } else {
+            System.out.println("Not deleted");
+        }
         return new ResponseEntity<>(retrievedOption.get(), HttpStatus.OK);
     }
 
