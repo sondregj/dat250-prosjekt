@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import no.hvl.dat250.polls.Repository.PollRepository;
+import no.hvl.dat250.polls.Repository.UserRepository;
 import no.hvl.dat250.polls.models.Poll;
+import no.hvl.dat250.polls.models.User;
 import no.hvl.dat250.polls.models.VoteOption;
 
 /**
@@ -20,6 +22,7 @@ public class PollService {
 
    @Autowired
    private PollRepository repo;
+   @Autowired UserRepository uRepo;
 
    /**
     * @param id The id of the Poll you want to retrieve
@@ -89,6 +92,16 @@ public class PollService {
     */
    @Transactional
    public boolean deletePollById(Long id){
+       Optional<Poll> retrievedPoll = repo.findById(id);
+       if (retrievedPoll.isEmpty()){
+           return false;
+       }
+       Poll poll = retrievedPoll.get();
+       User user = poll.getCreator();
+       if (user != null){
+           user.getCreatedPolls().remove(poll);
+           uRepo.save(user);
+       }
        repo.deleteById(id);
        return repo.findById(id).isEmpty();
    }

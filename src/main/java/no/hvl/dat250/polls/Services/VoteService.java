@@ -3,13 +3,17 @@ package no.hvl.dat250.polls.Services;
 import java.util.List;
 import java.util.Optional;
 
+import no.hvl.dat250.polls.models.User;
 import no.hvl.dat250.polls.models.Vote;
+import no.hvl.dat250.polls.models.VoteOption;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import no.hvl.dat250.polls.Repository.UserRepository;
 import no.hvl.dat250.polls.Repository.VoteRepository;
+import no.hvl.dat250.polls.Repository.VoteOptionRepository;
 
 /**
  * VoteService
@@ -19,6 +23,8 @@ import no.hvl.dat250.polls.Repository.VoteRepository;
 public class VoteService {
 
     @Autowired VoteRepository repo;
+    @Autowired VoteOptionRepository vRepo;
+    @Autowired UserRepository uRepo;
 
     public List<Vote> getAllVotes(){
         return repo.findAll();
@@ -56,6 +62,24 @@ public class VoteService {
      */
     @Transactional
     public boolean deleteVoteById(Long id){
+        Optional<Vote> retrievedVote = repo.findById(id);
+        if (retrievedVote.isEmpty()){
+            return false;
+        }
+
+        Vote vote = retrievedVote.get();
+        
+        User user = vote.getUser();
+        if (user != null){
+            user.getCastedVotes().remove(vote);
+            uRepo.save(user);
+        }
+        VoteOption option = vote.getVoteOption();
+        if (option != null){
+            option.getVotes().remove(vote);
+            vRepo.save(option);
+        }
+
         repo.deleteById(id);
         return getVoteById(id).isEmpty();
     }
