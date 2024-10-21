@@ -3,11 +3,12 @@ import Button from 'primevue/button'
 import FloatLabel from 'primevue/floatlabel'
 import Password from 'primevue/password'
 import InputText from 'primevue/inputtext'
+import { createNewUser } from '../helpermethods/helpermethods.js'
 
 const username = defineModel('username')
 const password = defineModel('password')
 const email = defineModel('email')
-const props = defineProps(['message', 'showEmail', 'buttonText'])
+const props = defineProps(['message', 'signup', 'buttonText'])
 </script>
 
 <template>
@@ -20,7 +21,7 @@ const props = defineProps(['message', 'showEmail', 'buttonText'])
         <label for="username">Username</label>
       </FloatLabel>
     </div>
-    <div class="input3" v-if="props.showEmail === true">
+    <div class="input3" v-if="props.signup === true">
       <FloatLabel>
         <InputText id="email" v-model="email" type="email" />
         <label for="email">Email</label>
@@ -33,7 +34,12 @@ const props = defineProps(['message', 'showEmail', 'buttonText'])
       </FloatLabel>
     </div>
     <div class="button">
-      <Button :label="props.buttonText"></Button>
+      <Button
+        :label="props.buttonText"
+        v-if="props.signup === true"
+        @click="createNewUser(username, password, email)"
+      ></Button>
+      <Button :label="props.buttonText" v-else></Button>
     </div>
   </div>
 </template>
