@@ -3,6 +3,7 @@ package no.hvl.dat250.polls.Services;
 import java.util.List;
 import java.util.Optional;
 
+import no.hvl.dat250.polls.utils.SignupUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -119,6 +120,8 @@ public class UserService {
 
     @Transactional
     public User addUser(User user){
+       String hashedPassword = SignupUtils.hashPassword(user.getPassword());
+       user.setPassword(hashedPassword);
         return repo.save(user);
     }
 }
