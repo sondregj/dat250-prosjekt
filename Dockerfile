@@ -1,9 +1,9 @@
-FROM gradle:8.0.2-jdk17 AS build
+FROM gradle:jdk-21-and-22 AS build
 WORKDIR /app
 COPY . .
 RUN gradle bootJar
 
-FROM eclipse-temurin:17-jdk-alpine
+FROM eclipse-temurin:21-jre
 
 # Set working directory
 WORKDIR /app
