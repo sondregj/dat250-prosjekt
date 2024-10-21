@@ -7,7 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
+import no.hvl.dat250.polls.Repository.PollRepository;
 import no.hvl.dat250.polls.Repository.VoteOptionRepository;
+import no.hvl.dat250.polls.Repository.VoteRepository;
+import no.hvl.dat250.polls.models.Poll;
 import no.hvl.dat250.polls.models.Vote;
 import no.hvl.dat250.polls.models.VoteOption;
 
@@ -20,6 +23,8 @@ import no.hvl.dat250.polls.models.VoteOption;
 public class VoteOptionService {
     
     @Autowired VoteOptionRepository repo;
+    @Autowired VoteRepository voteRepo;
+    @Autowired PollRepository pollRepo;
 
     /**
      *@param id the id of the voteoption you want to retrieve 
@@ -50,10 +55,36 @@ public class VoteOptionService {
      *@return True if the voteoption is deleted, false if not
      */
     @Transactional
-    public boolean deleteVoteOptionById(Long id){
-        repo.deleteById(id);
-        // TODO when a voteOption is deleted all votes that "voted" for this option is also deleted?
-        return repo.findById(id).isEmpty();
+    public boolean deleteVoteOptionById(Long id) {
+        // Find the VoteOption by ID
+        Optional<VoteOption> voteOptionOpt = repo.findById(id);
+        if (voteOptionOpt.isPresent()) {
+            VoteOption voteOption = voteOptionOpt.get();
+
+            // If there's an associated Poll, you might want to remove the VoteOption from the Poll's list
+            Poll poll = voteOption.getPoll();
+            if (poll != null) {
+                poll.getVoteOptions().remove(voteOption);
+                // Optionally save the Poll if you want to ensure that the changes are persisted
+                pollRepo.save(poll);
+            }
+
+            // Remove associated votes if needed
+            List<Vote> votes = voteOption.getVotes();
+            if (votes != null) {
+                for (Vote vote : votes) {
+                    // This will trigger cascade deletion if properly set up
+                    voteRepo.delete(vote);
+                }
+            }
+
+            // Delete the VoteOption itself
+            repo.deleteById(id);
+
+            // Verify that the VoteOption was indeed deleted
+            return repo.findById(id).isEmpty();
+        }
+        return false; // Return false if the VoteOption was not found
     }
 
     /**

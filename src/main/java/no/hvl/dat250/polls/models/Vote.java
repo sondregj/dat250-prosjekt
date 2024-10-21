@@ -5,7 +5,9 @@ import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
-import jakarta.persistence.Column;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -26,10 +28,12 @@ public class Vote {
 
     @ManyToOne
     @JoinColumn(name="user_id")
+    @JsonBackReference(value = "votes-User")
     private User user;
 
     @ManyToOne
     @JoinColumn(name = "vote_option_id")
+    @JsonBackReference(value = "votes-voteOption")
     private VoteOption voteOption;
 
     public Vote(Instant publishedAt){
@@ -69,6 +73,27 @@ public class Vote {
     public void setVoteOption(VoteOption voteOption) {
         this.voteOption = voteOption;
     }
+
+    @JsonProperty("pollId")
+    public Long getPollId() {
+        return voteOption != null && voteOption.getPoll() != null ? voteOption.getPoll().getId() : null;
+    }
+
+    @JsonProperty("pollQuestion")
+    public String getPollQuestion() {
+        return voteOption != null && voteOption.getPoll() != null ? voteOption.getPoll().getQuestion() : null;
+    }
+
+    @JsonProperty("voteOptionId")
+    public Long getVoteOptionId() {
+        return voteOption != null ? voteOption.getId() : null;
+    }
+
+    @JsonProperty("voteOptionCaption")
+    public String getVoteOptionCaption() {
+        return voteOption != null ? voteOption.getCaption() : null;
+    }
+
 
     @Override
     public boolean equals(Object o) {

@@ -96,6 +96,16 @@ public class UserServiceUnitTest {
         assertTrue(createdUser.getCastedVotes().get(1).equals(retrievedVotes.get(1)));
         assertTrue(createdUser.getCastedVotes().size() == retrievedPolls.size());
         assertTrue(createdUser.getCastedVotes().size() == 2);
+
+        assertTrue(vService.deleteVoteById(retrievedVotes.get(0).getId()));
+
+        Optional<Vote> deletedVote = vService.getVoteById(retrievedVotes.get(0).getId());
+        assertTrue(deletedVote.isEmpty());
+
+        assertTrue(pService.deletePollById(retrievedPolls.get(0).getId()));
+
+        Optional<Poll> deletedPoll = pService.getPollById(retrievedPolls.get(0).getId());
+        assertTrue(deletedPoll.isEmpty());
     }
     
     @Test

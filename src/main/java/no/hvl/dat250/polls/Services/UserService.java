@@ -45,7 +45,6 @@ public class UserService {
      */
     @Transactional
     public boolean deleteUserById(Long id){
-        // TODO add a feature that when a user is deleted his votes are deleted as well?
         repo.deleteById(id);
         return repo.findById(id).isEmpty();
     }
@@ -57,7 +56,6 @@ public class UserService {
     
     @Transactional
     public boolean deleteUser(User user){
-        // TODO add a feature that when a user is deleted his votes are deleted as well?
         repo.delete(user);
         return repo.findById(user.getId()).isEmpty();
     }
@@ -80,33 +78,37 @@ public class UserService {
         oldUser.setEmail(updatedUser.getEmail());
         oldUser.setUsername(updatedUser.getUsername());
 
-        // Handle createdPolls
-        List<Poll> pollsToRemove = oldUser.getCreatedPolls().stream()
-            .filter(p -> !updatedUser.getCreatedPolls().contains(p))
-            .toList(); 
+        if (updatedUser.getCreatedPolls() != null){
+            // Handle createdPolls
+            List<Poll> pollsToRemove = oldUser.getCreatedPolls().stream()
+                .filter(p -> !updatedUser.getCreatedPolls().contains(p))
+                .toList(); 
 
-        oldUser.getCreatedPolls().removeAll(pollsToRemove);  
+            oldUser.getCreatedPolls().removeAll(pollsToRemove);  
 
-        updatedUser.getCreatedPolls().forEach(p -> {
-            if (!oldUser.getCreatedPolls().contains(p)) {
-                p.setCreator(oldUser);  
-                oldUser.getCreatedPolls().add(p);
-            }
-        });
+            updatedUser.getCreatedPolls().forEach(p -> {
+                if (!oldUser.getCreatedPolls().contains(p)) {
+                    p.setCreator(oldUser);  
+                    oldUser.getCreatedPolls().add(p);
+                }
+            });
+        }
 
-        // Handle castedVotes
-        List<Vote> votesToRemove = oldUser.getCastedVotes().stream()
-            .filter(v -> !updatedUser.getCastedVotes().contains(v))
-            .toList();  
+        if (updatedUser.getCastedVotes() != null){
+            // Handle castedVotes
+            List<Vote> votesToRemove = oldUser.getCastedVotes().stream()
+                .filter(v -> !updatedUser.getCastedVotes().contains(v))
+                .toList();  
 
-        oldUser.getCastedVotes().removeAll(votesToRemove);  // Remove them
+            oldUser.getCastedVotes().removeAll(votesToRemove);  // Remove them
 
-        updatedUser.getCastedVotes().forEach(v -> {
-            if (!oldUser.getCastedVotes().contains(v)) {
-                v.setUser(oldUser);  // Ensure relationship consistency
-                oldUser.getCastedVotes().add(v);
-            }
-        });
+            updatedUser.getCastedVotes().forEach(v -> {
+                if (!oldUser.getCastedVotes().contains(v)) {
+                    v.setUser(oldUser);  // Ensure relationship consistency
+                    oldUser.getCastedVotes().add(v);
+                }
+            });
+        }
 
         return Optional.of(repo.save(oldUser));
     }
