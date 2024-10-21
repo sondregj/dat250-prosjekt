@@ -59,5 +59,4 @@ public class VoteController {
         }
         return new ResponseEntity<>(updated.get(), HttpStatus.OK);
     }
-    
 }
