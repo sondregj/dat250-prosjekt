@@ -48,7 +48,7 @@ public class UserServiceUnitTest {
     @Test
     public void testAddUser(){
         //Create a user 
-        User createdUser = new User("Test", "Test@email.com");
+        User createdUser = new User("Test", "Test@email.com", "test");
         //Create two new polls
         Poll poll1 = new Poll("Q1", Instant.now(), Instant.now().plusSeconds(3600));
         poll1.setCreator(createdUser); 
@@ -100,17 +100,19 @@ public class UserServiceUnitTest {
     
     @Test
     public void testGetUserById(){
-        User createdUser = new User("Test", "Test@email.com");
+        User createdUser = new User("Test", "Test@email.com", "test");
         createdUser = service.addUser(createdUser);
 
         User retrievedUser = service.getUserById(createdUser.getId()).get();
+        System.out.print("User created: " + createdUser);
+        System.out.print("User retrieved: " + retrievedUser);
         assertTrue(retrievedUser.equals(createdUser));
     }
 
     @Test
     public void testGetAllUsers(){
-        User createdUser = new User("Test", "Test@email.com");
-        User createdUser2 = new User("Test2", "Test2@email.com");
+        User createdUser = new User("Test", "Test@email.com", "test");
+        User createdUser2 = new User("Test2", "Test2@email.com", "test");
         createdUser = service.addUser(createdUser);
         createdUser2 = service.addUser(createdUser2);
 
@@ -124,7 +126,7 @@ public class UserServiceUnitTest {
     @Test
     public void testDeleteUserById(){
         //Create a user 
-        User createdUser = new User("Test", "Test@email.com");
+        User createdUser = new User("Test", "Test@email.com", "test");
         //Create two new polls
         Poll poll1 = new Poll("Q1", Instant.now(), Instant.now().plusSeconds(3600));
         poll1.setCreator(createdUser); 
@@ -157,7 +159,7 @@ public class UserServiceUnitTest {
     @Test
     public void testDeleteUser(){
         //Create a user 
-        User createdUser = new User("Test", "Test@email.com");
+        User createdUser = new User("Test", "Test@email.com", "test");
         //Create two new polls
         Poll poll1 = new Poll("Q1", Instant.now(), Instant.now().plusSeconds(3600));
         poll1.setCreator(createdUser); 
@@ -191,7 +193,7 @@ public class UserServiceUnitTest {
     @Test
     public void testUpdateUser(){
         //Create a user 
-        User createdUser = new User("Test", "Test@email.com");
+        User createdUser = new User("Test", "Test@email.com","test");
         //Create two new polls
         Poll poll1 = new Poll("Q1", Instant.now(), Instant.now().plusSeconds(3600));
         poll1.setCreator(createdUser); 
@@ -208,7 +210,7 @@ public class UserServiceUnitTest {
         createdUser = service.addUser(createdUser);
 
         //Create a new update user
-        User updatedUser = new User("Updated", "Updated@email.com");
+        User updatedUser = new User("Updated", "Updated@email.com","test");
         //Set his set of polls to be one new poll and one old poll
         Poll poll3 = new Poll("Q3", Instant.now(), Instant.now().plusSeconds(3600));
         poll3.setCreator(updatedUser);
