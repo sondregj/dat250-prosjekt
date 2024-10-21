@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 import no.hvl.dat250.polls.Repository.VoteOptionRepository;
-import no.hvl.dat250.polls.models.Vote;
 import no.hvl.dat250.polls.models.VoteOption;
 
 /**
@@ -52,7 +51,6 @@ public class VoteOptionService {
     @Transactional
     public boolean deleteVoteOptionById(Long id){
         repo.deleteById(id);
-        // TODO when a voteOption is deleted all votes that "voted" for this option is also deleted?
         return repo.findById(id).isEmpty();
     }
 

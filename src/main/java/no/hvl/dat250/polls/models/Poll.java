@@ -33,7 +33,7 @@ public class Poll {
     private User creator;
 
     @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    @JsonManagedReference
+    @JsonManagedReference(value = "voteOption-Poll")
     private List<VoteOption> voteOptions; 
 
     public Poll(){}

@@ -6,12 +6,14 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import no.hvl.dat250.polls.Services.VoteService;
 import no.hvl.dat250.polls.models.Vote;
@@ -20,6 +22,7 @@ import no.hvl.dat250.polls.models.Vote;
  * VoteController
  * @author Jonas Vestbø
  */
+@RestController
 @RequestMapping("/api/votes")
 public class VoteController {
 
@@ -44,6 +47,18 @@ public class VoteController {
         return new ResponseEntity<>(retrievedVote.get(), HttpStatus.OK);
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Vote> removeVote(@PathVariable("id") Long id){
+       Optional<Vote> retrievedVote = service.getVoteById(id);
+       if (retrievedVote.isEmpty()){
+           return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+       }
+       if (!service.deleteVoteById(id)){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+       }
+       return new ResponseEntity<>(retrievedVote.get(),HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<Vote> createVote(@RequestBody Vote createdVote){
         Vote vote = service.addVote(createdVote);
@@ -52,7 +67,7 @@ public class VoteController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Vote> updateVote(@PathVariable("id") Long id,
-            Vote updatedVote){
+            @RequestBody Vote updatedVote){
         Optional<Vote> updated = service.updateVote(id, updatedVote);
         if (updated.isEmpty()){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);

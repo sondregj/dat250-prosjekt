@@ -71,11 +71,16 @@ public class VoteService {
         }
         Vote oldVote = oldVoteOpt.get();
 
-        oldVote.setVoteOption(updatedVote.getVoteOption());
-        oldVote.setPublishedAt(updatedVote.getPublishedAt());
-        //TODO add functionality to change caster? and poll?
-        //if so also have to change saved user and poll elements
-
+        if (updatedVote.getVoteOption() != null){
+            System.out.println("Voteoption was updated");
+            oldVote.setVoteOption(updatedVote.getVoteOption());
+        } else {
+            System.out.println("VoteOption was not updated");
+        }
+        if (updatedVote.getPublishedAt() != null){
+            oldVote.setPublishedAt(updatedVote.getPublishedAt());
+        }
+        System.out.println("OldVote: " + oldVote.toString());
         return Optional.of(repo.save(oldVote));
     }
 

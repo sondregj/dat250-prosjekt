@@ -2,6 +2,8 @@ package no.hvl.dat250.polls.models;
 
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -26,6 +28,7 @@ public class User {
     private String email;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference(value = "votes-User")
     private List<Vote> castedVotes;
 
     @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
@@ -85,9 +88,7 @@ public class User {
 
         User user = (User) o;
 
-        // Compare the id field if it's non-null, as it is the unique identifier
         if (id != null ? !id.equals(user.id) : user.id != null) return false;
-        // Optionally compare other fields such as username and email
         if (username != null ? !username.equals(user.username) : user.username != null) return false;
         return email != null ? email.equals(user.email) : user.email == null;
     }
