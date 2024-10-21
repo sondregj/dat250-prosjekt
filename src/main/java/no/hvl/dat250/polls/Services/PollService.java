@@ -99,7 +99,12 @@ public class PollService {
     */
    @Transactional
    public Poll addPoll(Poll poll){
-        Poll savedPoll = repo.save(poll);
-        return savedPoll;
+       if (poll.getVoteOptions() != null && !poll.getVoteOptions().isEmpty()){
+           poll.getVoteOptions().forEach(vo -> {
+               vo.setPoll(poll);
+           });
+       }
+       Poll savedPoll = repo.save(poll);
+       return savedPoll;
    }
 }

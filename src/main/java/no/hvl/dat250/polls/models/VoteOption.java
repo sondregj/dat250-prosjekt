@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -30,6 +33,7 @@ public class VoteOption {
     private List<Vote> votes;
 
     @ManyToOne
+    @JsonBackReference
     private Poll poll;
 
     public VoteOption(){}
@@ -88,6 +92,11 @@ public class VoteOption {
 
     public void setPoll(Poll poll) {
         this.poll = poll;
+    }
+
+    @JsonProperty("pollId")
+    public Long getPollId() {
+        return poll != null ? poll.getId() : null;
     }
 
     @Override
