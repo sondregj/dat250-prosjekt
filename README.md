@@ -34,6 +34,11 @@ classDiagram
     Vote *--> "0..*" VoteOption
     User *--> "1..*" Poll : created
 ```
+
+## User stories
+![user-story.png](user-story.png)
+
+
 ## Authors
 - [Sondre Gjellestad](https://github.com/sondregj)
 - [Vebjørn Fjeldstad](https://github.com/602822)
