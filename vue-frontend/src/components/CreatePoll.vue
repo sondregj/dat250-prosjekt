@@ -4,18 +4,43 @@ import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
 import Tag from 'primevue/Tag'
 import { ref } from 'vue'
+import { createNewPoll } from '@/helpermethods/helpermethods.js'
+
+class VoteOption {
+  constructor(caption, presentationOrder) {
+    this.caption = caption
+    this.presentationOrder = presentationOrder
+  }
+}
 
 const question = defineModel('question')
 const voteOption = defineModel('voteOption')
-let voteOptions = ref([])
+const hoursValid = defineModel('hoursValid')
 
+let voteOptions = ref([])
+let sendVoteOptions = ref([])
 function addVoteOption() {
+  const addedVoteOption = new VoteOption(voteOption.value, sendVoteOptions.value.length + 1)
   voteOptions.value = [...voteOptions.value, voteOption.value]
+  sendVoteOptions.value = [...sendVoteOptions.value, addedVoteOption]
   voteOption.value = ''
 }
 
 function deleteLatest() {
   voteOptions.value.pop()
+  sendVoteOptions.value.pop()
+}
+
+function resetForm() {
+  question.value = ''
+  hoursValid.value = 0
+  voteOptions.value = []
+  sendVoteOptions.value = []
+}
+
+const handleSubmit = async () => {
+  await createNewPoll(question.value, hoursValid.value, sendVoteOptions.value)
+  resetForm()
 }
 </script>
 
@@ -26,6 +51,12 @@ function deleteLatest() {
       <FloatLabel>
         <InputText id="question" v-model="question" />
         <label for="question">Question</label>
+      </FloatLabel>
+    </div>
+    <div class="hoursValid">
+      <FloatLabel>
+        <InputText id="hoursvalid" v-model="hoursValid" />
+        <label for="hoursvalid">Hours Valid</label>
       </FloatLabel>
     </div>
     <div class="voteoptions">
@@ -45,7 +76,11 @@ function deleteLatest() {
         <Button label="Delete latest" @click="deleteLatest"></Button>
       </ul>
     </div>
-    <Button v-if="voteOptions.length >= 2" label="Submit"></Button>
+    <Button
+      v-if="voteOptions.length >= 2"
+      label="Submit"
+      @click="handleSubmit"
+    ></Button>
     <Button v-else label="Submit" disabled></Button>
   </div>
 </template>
@@ -101,5 +136,9 @@ p {
 
 li {
   margin: 5px;
+}
+
+div.hoursValid {
+  margin-bottom: 40px;
 }
 </style>
