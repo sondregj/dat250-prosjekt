@@ -1,10 +1,12 @@
 package no.hvl.dat250.polls.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -21,7 +23,7 @@ import jakarta.persistence.ManyToOne;
  * VoteOption
  */
 @Entity
-public class VoteOption {
+public class VoteOption implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -87,6 +89,7 @@ public class VoteOption {
     }
 
 
+    @JsonIgnore
     public Poll getPoll() {
         return poll;
     }

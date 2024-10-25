@@ -1,5 +1,6 @@
 package no.hvl.dat250.polls.models;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -20,7 +21,7 @@ import jakarta.persistence.OneToMany;
  * Poll
  */
 @Entity
-public class Poll {
+public class Poll implements Serializable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

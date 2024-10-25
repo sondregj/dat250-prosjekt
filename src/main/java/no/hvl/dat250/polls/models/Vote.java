@@ -1,11 +1,13 @@
 package no.hvl.dat250.polls.models;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Entity;
@@ -19,7 +21,7 @@ import jakarta.persistence.ManyToOne;
  * Vote
  */
 @Entity
-public class Vote {
+public class Vote implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -58,6 +60,7 @@ public class Vote {
         this.publishedAt = publishedAt.truncatedTo(ChronoUnit.SECONDS);
     }
 
+    @JsonIgnore
     public User getUser() {
         return user;
     }
@@ -66,6 +69,7 @@ public class Vote {
         this.user = user;
     }
 
+    @JsonIgnore
     public VoteOption getVoteOption() {
         return voteOption;
     }
