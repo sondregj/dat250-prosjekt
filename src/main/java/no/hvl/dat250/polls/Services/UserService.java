@@ -9,6 +9,7 @@ import no.hvl.dat250.polls.models.User;
 import no.hvl.dat250.polls.models.Vote;
 import no.hvl.dat250.polls.utils.SignupUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 /**
@@ -20,6 +21,9 @@ public class UserService {
 
     @Autowired
     private UserRepository repo;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private VoteService service;
@@ -132,9 +136,33 @@ public class UserService {
      */
 
     @Transactional
-    public User addUser(User user) {
-        String hashedPassword = SignupUtils.hashPassword(user.getPassword());
-        user.setPassword(hashedPassword);
+    public User addUser(UserCreationDTO dto) {
+        User user = new User();
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
         return repo.save(user);
+    }
+}
+
+public class UserCreationDTO {
+
+    @NotBlank
+    @Size(min = 4, max = 50)
+    private String username;
+
+    @NotBlank
+    @Size(min = 8, max = 100)
+    private String password;
+
+    public UserCreationDTO(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public String getPassword() {
+        return password;
     }
 }
