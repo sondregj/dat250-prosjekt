@@ -105,6 +105,10 @@ public class PollServiceUnitTests {
         List<VoteOption> retrievedOptions = vService.getAllVoteOptions();
         System.out.println("Retrieved options: " + retrievedOptions);
         assertTrue(retrievedOptions.equals(retrievedPoll.getVoteOptions()));
+        assertTrue(vService.deleteVoteOptionById(retrievedOptions.get(0).getId()));
+
+        Optional<VoteOption> retrievedOption = vService.getVoteOptionById(retrievedOptions.get(0).getId());
+        assertTrue(retrievedOption.isEmpty());
     }
     /**
      * Expected result:

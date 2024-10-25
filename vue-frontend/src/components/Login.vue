@@ -3,7 +3,7 @@ import Form from './Form.vue'
 </script>
 
 <template>
-  <Form message="Welcome back!" :showEmail="false" buttonText="Login" />
+  <Form message="Welcome back!" :signup="false" buttonText="Login" />
 </template>
 
 <style scoped></style>

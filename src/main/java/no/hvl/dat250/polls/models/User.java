@@ -1,6 +1,10 @@
 package no.hvl.dat250.polls.models;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -24,18 +28,34 @@ public class User {
     private Long id;
     private String username;
     private String email;
+    private String password;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference(value = "votes-User")
     private List<Vote> castedVotes;
 
     @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private List<Poll> createdPolls;
 
-    public User(){}
+    public User(){
+        castedVotes = new ArrayList<>();
+        createdPolls = new ArrayList<>();
+    }
 
-    public User(String username, String email){
+    public User(String username, String email, String password) {
         this.username = username;
         this.email = email;
+        this.password = password;
+        castedVotes = new ArrayList<>();
+        createdPolls = new ArrayList<>();
+
+    }
+
+    public User(String username, String email) {
+        this.username = username;
+        this.email = email;
+        castedVotes = new ArrayList<>();
+        createdPolls = new ArrayList<>();
     }
 
     public Long getId() {
@@ -78,28 +98,40 @@ public class User {
         this.createdPolls = createdPolls;
     }
 
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
         User user = (User) o;
-
-        // Compare the id field if it's non-null, as it is the unique identifier
         if (id != null ? !id.equals(user.id) : user.id != null) return false;
-        // Optionally compare other fields such as username and email
         if (username != null ? !username.equals(user.username) : user.username != null) return false;
-        return email != null ? email.equals(user.email) : user.email == null;
+        if (email != null ? !email.equals(user.email) : user.email != null) return false;
+        return password != null ? password.equals(user.password) : user.password == null;
     }
 
     @Override
-    public String toString(){
-        return "User{"+
-            "id=" + id +
-            ", username='" + username + '\'' +
-            ", email='" + email + '\'' +
-            '}';
+    public int hashCode() {
+        return Objects.hash(id, username, email, password, castedVotes, createdPolls);
     }
 
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", castedVotes=" + castedVotes +
+                ", createdPolls=" + createdPolls +
+                '}';
+    }
 }
 
