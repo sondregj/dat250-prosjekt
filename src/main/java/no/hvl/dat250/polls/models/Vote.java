@@ -7,7 +7,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.Entity;
@@ -60,7 +59,6 @@ public class Vote implements Serializable {
         this.publishedAt = publishedAt.truncatedTo(ChronoUnit.SECONDS);
     }
 
-    @JsonIgnore
     public User getUser() {
         return user;
     }
@@ -69,7 +67,6 @@ public class Vote implements Serializable {
         this.user = user;
     }
 
-    @JsonIgnore
     public VoteOption getVoteOption() {
         return voteOption;
     }
