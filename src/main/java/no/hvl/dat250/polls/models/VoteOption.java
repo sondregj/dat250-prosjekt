@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
@@ -88,8 +87,6 @@ public class VoteOption implements Serializable {
         this.votes = votes;
     }
 
-
-    @JsonIgnore
     public Poll getPoll() {
         return poll;
     }
