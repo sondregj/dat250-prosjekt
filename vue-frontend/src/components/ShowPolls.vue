@@ -45,7 +45,7 @@ async function handleDeletePoll(pollId) {
             <li v-for="voteoption in voteOptions.filter(option => option.pollId === poll.id)" :key="voteoption.id">
               <h3>{{ voteoption.caption }}</h3>
               <Button label="Upvote"></Button>
-              <h4>Number of Votes: 0</h4>
+              <h4>Number of votes: 0</h4>
             </li>
           </ul>
         </template>
