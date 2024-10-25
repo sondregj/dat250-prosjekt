@@ -26,6 +26,14 @@ dependencies {
   implementation("org.postgresql:postgresql:42.6.0")
   implementation("com.h2database:h2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+	implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+
 	testImplementation("org.springframework.security:spring-security-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
