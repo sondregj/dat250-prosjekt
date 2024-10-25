@@ -24,17 +24,18 @@ try {
     <h1 v-if="polls.length === 0">No polls</h1>
     <div v-else class="poll" v-for="poll in polls" :key="poll.id">
       <Card class="card">
-      <template #title>{{ poll.question }}</template>
-      <template #content>
-      <ul>
-        <li v-for="voteoption in voteOptions.filter(option => option.pollId === poll.id)" :key="voteoption.id">
-          <h3>{{ voteoption.caption }}</h3>
-          <Button label="Upvote"></Button>
-          <Button label="Downvote"></Button>
-          <h4>Number of votes: 0</h4>
-        </li>
-      </ul>
-      </template>
+        <template #title>
+          {{ poll.question }}
+        </template>
+        <template #content>
+          <ul>
+            <li v-for="voteoption in voteOptions.filter(option => option.pollId === poll.id)" :key="voteoption.id">
+              <h3>{{ voteoption.caption }}</h3>
+              <Button label="Upvote"></Button>
+              <h4>Number of votes: 0</h4>
+            </li>
+          </ul>
+        </template>
         <template #footer>
           <div class="footer">
             <Button label="Delete Poll" class="delete"></Button>
@@ -50,8 +51,6 @@ try {
 div.container {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
-  padding: 20px;
 }
 
 ul {
@@ -71,17 +70,15 @@ Button {
   margin: 0 10px;
 }
 
-
-
-
 div.poll {
   margin: 20px;
   flex: 1 1 200px;
 }
 
 .card {
-  width: 100%;
-  height: 100%;
+  width: fit-content;
+  height: fit-content;
+
 }
 
 div.footer {
@@ -89,7 +86,6 @@ div.footer {
   display: flex;
   justify-content: center;
 }
-
 
 
 </style>
