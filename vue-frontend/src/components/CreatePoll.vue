@@ -2,7 +2,7 @@
 import FloatLabel from 'primevue/floatlabel'
 import InputText from 'primevue/inputtext'
 import Button from 'primevue/button'
-import Tag from 'primevue/Tag'
+import Tag from 'primevue/tag'
 import { ref } from 'vue'
 import { createNewPoll } from '@/helpermethods/helpermethods.js'
 
