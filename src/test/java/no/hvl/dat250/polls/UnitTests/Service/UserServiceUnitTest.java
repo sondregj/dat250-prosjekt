@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import jakarta.transaction.Transactional;
 import no.hvl.dat250.polls.dto.UserCreationDTO;
 import no.hvl.dat250.polls.Repository.UserRepository;
 import no.hvl.dat250.polls.Repository.PollRepository;
@@ -23,6 +24,7 @@ import no.hvl.dat250.polls.Services.PollService;
 import no.hvl.dat250.polls.models.Poll;
 import no.hvl.dat250.polls.models.User;
 import no.hvl.dat250.polls.models.Vote;
+import no.hvl.dat250.polls.models.VoteOption;
 
 /**
  * UserServiceUnitTest
@@ -46,26 +48,44 @@ public class UserServiceUnitTest {
         vRepo.deleteAll();
     }
 
+    @Transactional
     @Test
     public void testAddUser(){
+        System.out.println("Start addUser test");
         //Create a user 
         UserCreationDTO userDTO = new UserCreationDTO("Test", "Test@email.com", "test");
         User createdUser = service.addUser(userDTO);
+        System.out.println("User created0: " + createdUser);
+        
+        VoteOption option1 = new VoteOption("Option1", 1);
+        VoteOption option2 = new VoteOption("Option2", 2);
         
         //Create two new polls
         Poll poll1 = new Poll("Q1", Instant.now(), Instant.now().plusSeconds(3600));
+        poll1.getVoteOptions().add(option1);
+        poll1.getVoteOptions().add(option2);
         poll1.setCreator(createdUser); 
         Poll poll2 = new Poll("Q2", Instant.now(), Instant.now().plusSeconds(3600));
+        poll2.getVoteOptions().add(option1);
+        poll2.getVoteOptions().add(option2);
         poll2.setCreator(createdUser); 
-        createdUser.setCreatedPolls(List.of(poll1, poll2));
+        createdUser.getCreatedPolls().add(poll1);
+        createdUser.getCreatedPolls().add(poll2);
+        createdUser = service.updateUser(createdUser.getId(), createdUser).get();
+        System.out.println("User created1.5: " + createdUser);
 
         //Create two new votes 
         Vote vote1 = new Vote(Instant.now());
         vote1.setUser(createdUser);
-        Vote vote2 = new Vote(Instant.now());
+        vote1.setVoteOption(createdUser.getCreatedPolls().get(0).getVoteOptions().get(0));
+        Vote vote2 = new Vote(Instant.now().plusSeconds(3600));
         vote2.setUser(createdUser);
-        createdUser.setCastedVotes(List.of(vote1, vote2));
+        vote2.setVoteOption(createdUser.getCreatedPolls().get(0).getVoteOptions().get(0));
+        createdUser.getCastedVotes().add(vote1);
+        createdUser.getCastedVotes().add(vote2);
         createdUser = service.updateUser(createdUser.getId(), createdUser).get();
+
+        System.out.println("User created1: " + createdUser);
 
         //Adding the user should also save the User and the two polls in the databas
         //createdUser whould now have an id and have a list of created polls
@@ -79,7 +99,6 @@ public class UserServiceUnitTest {
         assertTrue(createdUser.getCastedVotes().size() == 2);
         assertTrue(createdUser.getCastedVotes().get(0).getVoteOptionId().equals(vote1.getVoteOptionId()));
         assertTrue(createdUser.getCastedVotes().get(1).getVoteOptionId().equals(vote2.getVoteOptionId()));
-        
         //Retrieve all polls this should be equal to the polls created by 
         //the new user
         List<Poll> retrievedPolls = pService.getAllPolls();
@@ -109,6 +128,8 @@ public class UserServiceUnitTest {
 
         Optional<Poll> deletedPoll = pService.getPollById(retrievedPolls.get(0).getId());
         assertTrue(deletedPoll.isEmpty());
+
+        System.out.println("Ende addUser test");
     }
     
     @Test

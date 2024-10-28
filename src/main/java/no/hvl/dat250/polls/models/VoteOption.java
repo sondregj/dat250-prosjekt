@@ -102,6 +102,16 @@ public class VoteOption implements Serializable {
     }
 
     @Override
+    public String toString(){
+        return "VoteOption{" +
+            "id=" + id +
+            ", caption='" + caption + '\'' +
+            ", presentationOrder=" + presentationOrder +
+            ", poll=" + (poll != null ? poll.getId() : "null") +
+            '}';
+    }
+
+    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;

@@ -111,7 +111,7 @@ public class Poll implements Serializable {
 
     @Override
     public String toString(){
-        return "Id: " + this.id + " Question: " + this.question + " Creator: " + this.creator +
+        return "Id: " + this.id + " Question: " + this.question + " Creator: " + this.creator.getId() +
                 " VoteOptions: " + this.voteOptions + " Lagd: " + this.publishedAt + " Gyldig til: "
                 + this.validUntil;
     }

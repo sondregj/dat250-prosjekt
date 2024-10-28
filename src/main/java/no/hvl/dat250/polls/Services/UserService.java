@@ -116,14 +116,18 @@ public class UserService {
                 .filter(v -> !updatedUser.getCastedVotes().contains(v))
                 .toList();
 
+            System.out.println("Votes to remove: " + votesToRemove);
+
             oldUser.getCastedVotes().removeAll(votesToRemove); // Remove them
 
             updatedUser
                 .getCastedVotes()
                 .forEach(v -> {
+                    System.out.println("Checking vote: " + v);
                     if (!oldUser.getCastedVotes().contains(v)) {
                         v.setUser(oldUser); // Ensure relationship consistency
                         oldUser.getCastedVotes().add(v);
+                        System.out.println("Added vote: " + v);
                     }
                 });
         }
