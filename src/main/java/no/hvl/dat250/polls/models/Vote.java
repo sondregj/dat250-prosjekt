@@ -1,5 +1,6 @@
 package no.hvl.dat250.polls.models;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -19,7 +20,7 @@ import jakarta.persistence.ManyToOne;
  * Vote
  */
 @Entity
-public class Vote {
+public class Vote implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)

@@ -1,5 +1,6 @@
 package no.hvl.dat250.polls.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -21,7 +22,7 @@ import jakarta.persistence.ManyToOne;
  * VoteOption
  */
 @Entity
-public class VoteOption {
+public class VoteOption implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -85,7 +86,6 @@ public class VoteOption {
     public void setVotes(List<Vote> votes) {
         this.votes = votes;
     }
-
 
     public Poll getPoll() {
         return poll;
