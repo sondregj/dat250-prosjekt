@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 
+import no.hvl.dat250.polls.dto.UserCreationDTO;
 import no.hvl.dat250.polls.Repository.UserRepository;
 import no.hvl.dat250.polls.Repository.PollRepository;
 import no.hvl.dat250.polls.Repository.VoteRepository;
@@ -48,7 +49,9 @@ public class UserServiceUnitTest {
     @Test
     public void testAddUser(){
         //Create a user 
-        User createdUser = new User("Test", "Test@email.com", "test");
+        UserCreationDTO userDTO = new UserCreationDTO("Test", "Test@email.com", "test");
+        User createdUser = service.addUser(userDTO);
+        
         //Create two new polls
         Poll poll1 = new Poll("Q1", Instant.now(), Instant.now().plusSeconds(3600));
         poll1.setCreator(createdUser); 
@@ -62,7 +65,7 @@ public class UserServiceUnitTest {
         Vote vote2 = new Vote(Instant.now());
         vote2.setUser(createdUser);
         createdUser.setCastedVotes(List.of(vote1, vote2));
-        createdUser = service.addUser(createdUser);
+        createdUser = service.updateUser(createdUser.getId(), createdUser).get();
 
         //Adding the user should also save the User and the two polls in the databas
         //createdUser whould now have an id and have a list of created polls
@@ -71,11 +74,11 @@ public class UserServiceUnitTest {
         assertTrue(createdUser.getUsername().equals("Test"));
         assertTrue(createdUser.getEmail().equals("Test@email.com"));
         assertTrue(createdUser.getCreatedPolls().size() == 2);
-        assertTrue(createdUser.getCreatedPolls().get(0).equals(poll1));
-        assertTrue(createdUser.getCreatedPolls().get(1).equals(poll2));
+        assertTrue(createdUser.getCreatedPolls().get(0).getQuestion().equals(poll1.getQuestion()));
+        assertTrue(createdUser.getCreatedPolls().get(1).getQuestion().equals(poll2.getQuestion()));
         assertTrue(createdUser.getCastedVotes().size() == 2);
-        assertTrue(createdUser.getCastedVotes().get(0).equals(vote1));
-        assertTrue(createdUser.getCastedVotes().get(1).equals(vote2));
+        assertTrue(createdUser.getCastedVotes().get(0).getVoteOptionId().equals(vote1.getVoteOptionId()));
+        assertTrue(createdUser.getCastedVotes().get(1).getVoteOptionId().equals(vote2.getVoteOptionId()));
         
         //Retrieve all polls this should be equal to the polls created by 
         //the new user
@@ -110,8 +113,8 @@ public class UserServiceUnitTest {
     
     @Test
     public void testGetUserById(){
-        User createdUser = new User("Test", "Test@email.com", "test");
-        createdUser = service.addUser(createdUser);
+        UserCreationDTO userDTO = new UserCreationDTO("Test", "Test@email.com", "test");
+        User createdUser = service.addUser(userDTO);
 
         User retrievedUser = service.getUserById(createdUser.getId()).get();
         System.out.print("User created: " + createdUser);
@@ -121,10 +124,10 @@ public class UserServiceUnitTest {
 
     @Test
     public void testGetAllUsers(){
-        User createdUser = new User("Test", "Test@email.com", "test");
-        User createdUser2 = new User("Test2", "Test2@email.com", "test");
-        createdUser = service.addUser(createdUser);
-        createdUser2 = service.addUser(createdUser2);
+        UserCreationDTO userDTO = new UserCreationDTO("Test", "Test@email.com", "test");
+        User createdUser = service.addUser(userDTO);
+        UserCreationDTO userDTO2 = new UserCreationDTO("Test2", "Test2@email.com", "test");
+        User createdUser2 = service.addUser(userDTO2);
 
         List<User> allUsers = service.getAllUsers();
 
@@ -136,7 +139,9 @@ public class UserServiceUnitTest {
     @Test
     public void testDeleteUserById(){
         //Create a user 
-        User createdUser = new User("Test", "Test@email.com", "test");
+        UserCreationDTO userDTO = new UserCreationDTO("Test", "Test@email.com", "test");
+        User createdUser = service.addUser(userDTO);
+
         //Create two new polls
         Poll poll1 = new Poll("Q1", Instant.now(), Instant.now().plusSeconds(3600));
         poll1.setCreator(createdUser); 
@@ -150,7 +155,7 @@ public class UserServiceUnitTest {
         Vote vote2 = new Vote(Instant.now());
         vote2.setUser(createdUser);
         createdUser.setCastedVotes(List.of(vote1, vote2));
-        createdUser = service.addUser(createdUser);
+        createdUser = service.updateUser(createdUser.getId(), createdUser).get();
 
         //Check that the user was creted
         assertTrue(createdUser.getId() != null);
@@ -168,8 +173,10 @@ public class UserServiceUnitTest {
 
     @Test
     public void testDeleteUser(){
-        //Create a user 
-        User createdUser = new User("Test", "Test@email.com", "test");
+        //Create a user
+        UserCreationDTO userDTO = new UserCreationDTO("Test", "Test@email.com", "test");
+        User createdUser = service.addUser(userDTO);
+
         //Create two new polls
         Poll poll1 = new Poll("Q1", Instant.now(), Instant.now().plusSeconds(3600));
         poll1.setCreator(createdUser); 
@@ -183,7 +190,7 @@ public class UserServiceUnitTest {
         Vote vote2 = new Vote(Instant.now());
         vote2.setUser(createdUser);
         createdUser.setCastedVotes(List.of(vote1, vote2));
-        createdUser = service.addUser(createdUser);
+        createdUser = service.updateUser(createdUser.getId(), createdUser).get();
 
         //Check that the user, polls and votes is created
         assertTrue(createdUser.getId() != null);
@@ -203,7 +210,9 @@ public class UserServiceUnitTest {
     @Test
     public void testUpdateUser(){
         //Create a user 
-        User createdUser = new User("Test", "Test@email.com","test");
+        UserCreationDTO userDTO = new UserCreationDTO("Test", "Test@email.com", "test");
+        User createdUser = service.addUser(userDTO);
+
         //Create two new polls
         Poll poll1 = new Poll("Q1", Instant.now(), Instant.now().plusSeconds(3600));
         poll1.setCreator(createdUser); 
@@ -217,7 +226,7 @@ public class UserServiceUnitTest {
         Vote vote2 = new Vote(Instant.now());
         vote2.setUser(createdUser);
         createdUser.setCastedVotes(List.of(vote1, vote2));
-        createdUser = service.addUser(createdUser);
+        createdUser = service.updateUser(createdUser.getId(), createdUser).get();
 
         //Create a new update user
         User updatedUser = new User("Updated", "Updated@email.com","test");
