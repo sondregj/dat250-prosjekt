@@ -1,9 +1,11 @@
 package no.hvl.dat250.polls.models;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -22,7 +24,7 @@ import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "\"user\"") // Escapes the table name "user"
-public class User {
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -90,6 +92,7 @@ public class User {
         this.castedVotes = castedVotes;
     }
 
+    @JsonIgnore
     public List<Poll> getCreatedPolls() {
         return createdPolls;
     }

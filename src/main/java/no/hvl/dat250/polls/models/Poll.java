@@ -1,5 +1,6 @@
 package no.hvl.dat250.polls.models;
 
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -22,7 +23,7 @@ import jakarta.persistence.OneToMany;
  * Poll
  */
 @Entity
-public class Poll {
+public class Poll implements Serializable {
     
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -113,7 +114,7 @@ public class Poll {
 
     @Override
     public String toString(){
-        return "Id: " + this.id + " Question: " + this.question + " Creator: " + this.creator +
+        return "Id: " + this.id + " Question: " + this.question + " Creator: " + this.creator.getId() +
                 " VoteOptions: " + this.voteOptions + " Lagd: " + this.publishedAt + " Gyldig til: "
                 + this.validUntil;
     }

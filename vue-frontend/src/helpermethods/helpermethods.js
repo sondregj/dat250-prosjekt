@@ -93,7 +93,7 @@ export async function getVoteOptions() {
     }
 
     //No content
-    if (response.status == 204) {
+    if (response.status === 204) {
       return []
     }
 
@@ -103,6 +103,7 @@ export async function getVoteOptions() {
     return []
   }
 }
+
 
 export async function addVote(voteoption){
   try {
@@ -121,5 +122,27 @@ export async function addVote(voteoption){
   } catch(error){
     console.error('Failed to fetch polls', error)
     return null;
+  }
+}
+
+export async function deletePoll(pollId) {
+  try {
+    const response = await fetch(`http://localhost:8080/api/polls/${pollId}`, {
+      method: 'DELETE',
+    })
+
+    if (response.status === 404) {
+    throw new Error(`Pole with ID ${pollId} not found`);
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    console.log(`Poll with ID ${pollId} deleted successfully`, response)
+
+  } catch (error) {
+    console.error(`Failed to delete poll with ID ${pollId}`, error);
+    throw error;
   }
 }

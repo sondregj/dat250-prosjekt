@@ -1,5 +1,5 @@
 <script setup>
-import {addVote, getPolls, getVoteOptions} from '@/helpermethods/helpermethods.js'
+import {addVote, getPolls, getVoteOptions, deletePoll} from '@/helpermethods/helpermethods.js'
 import {ref} from 'vue'
 import Button from "primevue/button";
 import Card from "primevue/card";
@@ -21,13 +21,26 @@ try {
 } catch (e) {
   error.value = e
 }
+
+
+async function handleDeletePoll(pollId) {
+  try {
+    await deletePoll(pollId)
+    polls.value = polls.value.filter(poll => poll.id !== pollId)
+  } catch (error) {
+    console.log(error)
+  }
+
+}
+
+
 </script>
 
 <template>
-  <h1>Polls</h1>
+  <h1 v-if="polls.length > 0">Polls</h1>
   <div v-if="error">Error : {{ error }}</div>
   <div class="container">
-    <h1 v-if="polls.length === 0">No polls</h1>
+    <h1 v-if="polls.length === 0">No polls :(</h1>
     <div v-else class="poll" v-for="poll in polls" :key="poll.id">
       <Card class="card">
         <template #title>
@@ -44,7 +57,7 @@ try {
         </template>
         <template #footer>
           <div class="footer">
-            <Button label="Delete Poll" class="delete"></Button>
+            <Button label="Delete Poll" class="delete" @click="handleDeletePoll(poll.id)" ></Button>
           </div>
         </template>
       </Card>
