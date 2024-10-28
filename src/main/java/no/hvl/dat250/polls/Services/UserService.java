@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import no.hvl.dat250.polls.Repository.UserRepository;
+import no.hvl.dat250.polls.dto.UserCreationDTO;
 import no.hvl.dat250.polls.models.Poll;
 import no.hvl.dat250.polls.models.User;
 import no.hvl.dat250.polls.models.Vote;
@@ -138,31 +139,10 @@ public class UserService {
     @Transactional
     public User addUser(UserCreationDTO dto) {
         User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setEmail(dto.getEmail());
+        user.setPassword(dto.getPassword());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
         return repo.save(user);
-    }
-}
-
-public class UserCreationDTO {
-
-    @NotBlank
-    @Size(min = 4, max = 50)
-    private String username;
-
-    @NotBlank
-    @Size(min = 8, max = 100)
-    private String password;
-
-    public UserCreationDTO(String username, String password) {
-        this.username = username;
-        this.password = password;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getPassword() {
-        return password;
     }
 }

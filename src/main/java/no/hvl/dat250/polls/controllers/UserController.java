@@ -3,6 +3,7 @@ package no.hvl.dat250.polls.controllers;
 import java.util.List;
 import java.util.Optional;
 import no.hvl.dat250.polls.Services.UserService;
+import no.hvl.dat250.polls.dto.UserCreationDTO;
 import no.hvl.dat250.polls.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<User> addUser(@RequestBody User user) {
+    public ResponseEntity<User> addUser(@RequestBody UserCreationDTO user) {
         User savedUser = service.addUser(user);
         return new ResponseEntity<>(savedUser, HttpStatus.OK);
     }
