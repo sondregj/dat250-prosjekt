@@ -5,6 +5,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.logging.log4j.util.PropertySource.Comparator;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -86,7 +88,8 @@ public class Poll {
     }
 
     public List<VoteOption> getVoteOptions() {
-        return voteOptions;
+        this.voteOptions.sort(java.util.Comparator.comparingInt(VoteOption::getPresentationOrder));
+        return this.voteOptions;
     }
 
     public void setVoteOptions(List<VoteOption> voteOptions) {
