@@ -1,5 +1,5 @@
 <script setup>
-import {getPolls, getVoteOptions, deletePoll} from '@/helpermethods/helpermethods.js'
+import {addVote, getPolls, getVoteOptions, deletePoll} from '@/helpermethods/helpermethods.js'
 import {ref} from 'vue'
 import Button from "primevue/button";
 import Card from "primevue/card";
@@ -7,6 +7,12 @@ import Card from "primevue/card";
 const polls = ref([])
 const error = ref(null)
 const voteOptions = ref([])
+
+async function handleVote(voteOption){
+  addVote(voteOption);
+  polls.value = await getPolls();
+  voteOptions.value = await getVoteOptions();
+}
 
 try {
   polls.value = await getPolls()
@@ -44,8 +50,8 @@ async function handleDeletePoll(pollId) {
           <ul>
             <li v-for="voteoption in voteOptions.filter(option => option.pollId === poll.id)" :key="voteoption.id">
               <h3>{{ voteoption.caption }}</h3>
-              <Button label="Upvote"></Button>
-              <h4>Number of votes: 0</h4>
+              <Button label="Upvote" @click="handleVote(voteoption)"></Button>
+              <h4>Number of votes: {{voteoption.votes.length}}</h4>
             </li>
           </ul>
         </template>

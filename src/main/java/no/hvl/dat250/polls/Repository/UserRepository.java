@@ -11,9 +11,8 @@ import org.springframework.data.repository.query.Param;
  */
 public interface UserRepository extends JpaRepository<User, Long> {
     /**
-     * Add more methods here if needed for example:
-     * @Query("SELECT * WHERE ID = 1")
-     * public User getWithId1();
+     * Add more methods here if needed using the 
+     * @Query(JPAsql)
      */
 
     @Query("SELECT u FROM User u WHERE u.username = :username")
