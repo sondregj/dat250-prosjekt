@@ -64,7 +64,7 @@ public class VoteOptionService {
             // If there's an associated Poll, you might want to remove the VoteOption from the Poll's list
             Poll poll = voteOption.getPoll();
             if (poll != null) {
-                poll.getVoteOptions().remove(voteOption);
+                poll.getVoteOptionMutable().remove(voteOption);
                 // Optionally save the Poll if you want to ensure that the changes are persisted
                 pollRepo.save(poll);
             }

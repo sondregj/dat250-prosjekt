@@ -62,12 +62,12 @@ public class UserServiceUnitTest {
         
         //Create two new polls
         Poll poll1 = new Poll("Q1", Instant.now(), Instant.now().plusSeconds(3600));
-        poll1.getVoteOptions().add(option1);
-        poll1.getVoteOptions().add(option2);
+        poll1.getVoteOptionMutable().add(option1);
+        poll1.getVoteOptionMutable().add(option2);
         poll1.setCreator(createdUser); 
         Poll poll2 = new Poll("Q2", Instant.now(), Instant.now().plusSeconds(3600));
-        poll2.getVoteOptions().add(option1);
-        poll2.getVoteOptions().add(option2);
+        poll2.getVoteOptionMutable().add(option1);
+        poll2.getVoteOptionMutable().add(option2);
         poll2.setCreator(createdUser); 
         createdUser.getCreatedPolls().add(poll1);
         createdUser.getCreatedPolls().add(poll2);
@@ -84,8 +84,6 @@ public class UserServiceUnitTest {
         createdUser.getCastedVotes().add(vote1);
         createdUser.getCastedVotes().add(vote2);
         createdUser = service.updateUser(createdUser.getId(), createdUser).get();
-
-        System.out.println("User created1: " + createdUser);
 
         //Adding the user should also save the User and the two polls in the databas
         //createdUser whould now have an id and have a list of created polls

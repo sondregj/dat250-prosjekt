@@ -28,9 +28,9 @@ public class PollService {
     * @param id The id of the Poll you want to retrieve
     * @return The poll with the given id as an optional or an empty Optional if no poll exists
     */
-   public Optional<Poll> getPollById(Long id){
+   public Optional<Poll> getPollById(Long id){  
        return repo.findById(id);
-   }
+   } 
 
    /**
     * @return Every poll in the database or an empty list if there are none
@@ -64,13 +64,13 @@ public class PollService {
            .toList();
 
        //Remove them
-       retrievedPoll.getVoteOptions().removeAll(removedVoteOptions);
+       retrievedPoll.getVoteOptionMutable().removeAll(removedVoteOptions);
 
        //Add all noexisting values
         updatedPoll.getVoteOptions().forEach(p -> {
             if (!retrievedPoll.getVoteOptions().contains(p)) {
                 p.setPoll(retrievedPoll);
-                retrievedPoll.getVoteOptions().add(p);
+                retrievedPoll.getVoteOptionMutable().add(p);
             }
         });
 
@@ -113,7 +113,7 @@ public class PollService {
    @Transactional
    public Poll addPoll(Poll poll){
        if (poll.getVoteOptions() != null && !poll.getVoteOptions().isEmpty()){
-           poll.getVoteOptions().forEach(vo -> {
+           poll.getVoteOptionMutable().forEach(vo -> {
                vo.setPoll(poll);
            });
        }

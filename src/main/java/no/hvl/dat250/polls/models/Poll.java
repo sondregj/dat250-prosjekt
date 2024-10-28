@@ -6,8 +6,6 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.logging.log4j.util.PropertySource.Comparator;
-
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -89,7 +87,12 @@ public class Poll implements Serializable {
     }
 
     public List<VoteOption> getVoteOptions() {
-        this.voteOptions.sort(java.util.Comparator.comparingInt(VoteOption::getPresentationOrder));
+        return this.voteOptions.stream()
+            .sorted(java.util.Comparator.comparing(VoteOption::getPresentationOrder))
+            .toList();
+    }
+    
+    public List<VoteOption> getVoteOptionMutable(){
         return this.voteOptions;
     }
 
@@ -115,7 +118,7 @@ public class Poll implements Serializable {
     @Override
     public String toString(){
         return "Id: " + this.id + " Question: " + this.question + " Creator: " + this.creator.getId() +
-                " VoteOptions: " + this.voteOptions + " Lagd: " + this.publishedAt + " Gyldig til: "
-                + this.validUntil;
+        " VoteOptions: " + this.voteOptions + " Lagd: " + this.publishedAt + " Gyldig til: "
+        + this.validUntil;
     }
 }
