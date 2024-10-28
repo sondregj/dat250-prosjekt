@@ -10,9 +10,8 @@ import no.hvl.dat250.polls.models.User;
 public interface UserRepository extends JpaRepository<User, Long>{
 
     /**
-     * Add more methods here if needed for example:
-     * @Query("SELECT * WHERE ID = 1")
-     * public User getWithId1();
+     * Add more methods here if needed using the 
+     * @Query(JPAsql)
      */
     
 }

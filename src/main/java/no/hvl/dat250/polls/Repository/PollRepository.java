@@ -9,11 +9,7 @@ import no.hvl.dat250.polls.models.Poll;
  */
 public interface PollRepository extends JpaRepository<Poll, Long>{
     /**
-     * Add more methods here if needed for example:
-     * @Query("SELECT * WHERE ID = 1")
-     * public Poll getWithId1();
+     * Add more methods here if needed using the 
+     * @Query(JPAsql)
      */
-
-
-
 }
