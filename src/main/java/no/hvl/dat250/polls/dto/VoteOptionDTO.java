@@ -9,6 +9,8 @@ public class VoteOptionDTO {
    private String caption;
    private int presentationOrder;
 
+   public VoteOptionDTO(){}
+
    public VoteOptionDTO(Long id, String caption, int presentationOrder){
        this.id = id;
        this.caption = caption;

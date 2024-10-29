@@ -15,6 +15,8 @@ public class PollDTO {
     private String creatorUsername;
     private List<VoteOptionDTO> voteOptions;
 
+    public PollDTO(){}
+
     public PollDTO(Long id, String question, Instant publishedAt, Instant validUntil, 
                    String creatorUsername, List<VoteOptionDTO> voteOptions){
         this.id = id;
