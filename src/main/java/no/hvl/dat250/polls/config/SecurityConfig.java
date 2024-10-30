@@ -51,9 +51,10 @@ public class SecurityConfig {
                 auth
                     // TODO: Add more specific rules
                     .requestMatchers("/api/auth/**", "/api/users", "/api/votes/**", "/api/polls/**")
+                    // .anyRequest()
+                    // .authenticated()
+                    .requestMatchers("/**")
                     .permitAll()
-                    .anyRequest()
-                    .authenticated()
             );
 
         return http.build();
