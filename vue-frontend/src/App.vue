@@ -6,6 +6,7 @@
       <nav>
         <RouterLink to="/">Home</RouterLink>
         <RouterLink to="/login">Login</RouterLink>
+        <!-- TODO: add logout if logged in -->
         <RouterLink to="/signup">Signup</RouterLink>
         <RouterLink to="/createPoll">Create Poll</RouterLink>
       </nav>

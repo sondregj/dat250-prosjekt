@@ -3,7 +3,7 @@ import Button from 'primevue/button'
 import FloatLabel from 'primevue/floatlabel'
 import Password from 'primevue/password'
 import InputText from 'primevue/inputtext'
-import { createNewUser } from '../helpermethods/helpermethods.js'
+import { createNewUser, loginUser } from '../helpermethods/helpermethods.js'
 
 const username = defineModel('username')
 const password = defineModel('password')
@@ -18,6 +18,11 @@ const resetForm = () => {
 
 const handleSubmit = async () => {
   await createNewUser(username.value, password.value, email.value)
+  resetForm()
+}
+
+const handleSubmitLogin = async () => {
+  loginUser(username.value, password.value)
   resetForm()
 }
 </script>
@@ -50,7 +55,11 @@ const handleSubmit = async () => {
         v-if="props.signup === true"
         @click="handleSubmit"
       ></Button>
-      <Button :label="props.buttonText" v-else></Button>
+      <Button
+        :label="props.buttonText"
+        v-else
+        @click="handleSubmitLogin"
+      ></Button>
     </div>
   </div>
 </template>

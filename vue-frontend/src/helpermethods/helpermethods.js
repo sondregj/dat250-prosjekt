@@ -27,6 +27,39 @@ export function createNewUser(username, password, email) {
     })
 }
 
+export function loginUser(username, password) {
+  fetch('http://localhost:8080/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({
+      username: username,
+      password: password,
+    }),
+    headers: {
+      'Content-Type': 'application/json',
+      // TODO: response is returned as text for some reason
+      Accept: 'application/json',
+    },
+  })
+    .then(response => {
+      if (response.ok) {
+        username = ''
+        password = ''
+        console.log('user logged in successfully')
+        return response.text()
+      } else {
+        return response.json().then(data => {
+          throw new Error(data.message || 'Failed to login user')
+        })
+      }
+    })
+    .then(data => {
+      console.log('jwt:' + data)
+    })
+    .catch(error => {
+      alert(error.message)
+    })
+}
+
 export function createNewPoll(question, hoursvalid, voteoptions) {
   const now = new Date()
   const validUntil = new Date(now)
@@ -104,24 +137,23 @@ export async function getVoteOptions() {
   }
 }
 
-
-export async function addVote(voteoption){
+export async function addVote(voteoption) {
   try {
-    const response = await fetch('http://localhost:8080/api/votes',{
+    const response = await fetch('http://localhost:8080/api/votes', {
       method: 'POST',
-      headers: {'Content-Type':'application/json'},
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         publishedAt: Date.now(),
-        voteOption: voteoption
-      })
+        voteOption: voteoption,
+      }),
     })
-    if (!response.ok){
-      throw new Error("Http error! Status: "+ response.status);
+    if (!response.ok) {
+      throw new Error('Http error! Status: ' + response.status)
     }
-    return await response.json();
-  } catch(error){
+    return await response.json()
+  } catch (error) {
     console.error('Failed to fetch polls', error)
-    return null;
+    return null
   }
 }
 
@@ -132,17 +164,16 @@ export async function deletePoll(pollId) {
     })
 
     if (response.status === 404) {
-    throw new Error(`Pole with ID ${pollId} not found`);
+      throw new Error(`Pole with ID ${pollId} not found`)
     }
 
     if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
+      throw new Error(`HTTP error! status: ${response.status}`)
     }
 
     console.log(`Poll with ID ${pollId} deleted successfully`, response)
-
   } catch (error) {
-    console.error(`Failed to delete poll with ID ${pollId}`, error);
-    throw error;
+    console.error(`Failed to delete poll with ID ${pollId}`, error)
+    throw error
   }
 }
