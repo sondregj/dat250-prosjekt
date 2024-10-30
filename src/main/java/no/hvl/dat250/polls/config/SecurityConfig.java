@@ -53,7 +53,6 @@ public class SecurityConfig {
                     .requestMatchers("/api/auth/**", "/api/users", "/api/votes/**", "/api/polls/**")
                     // .anyRequest()
                     // .authenticated()
-                    .requestMatchers("/**")
                     .permitAll()
             );
 
