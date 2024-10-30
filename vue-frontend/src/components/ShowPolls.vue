@@ -1,27 +1,46 @@
 <script setup>
-import {addVote, getPolls, getVoteOptions, deletePoll} from '@/helpermethods/helpermethods.js'
-import {ref} from 'vue'
-import Button from "primevue/button";
-import Card from "primevue/card";
+import { addVote, getPolls, deletePoll } from '@/helpermethods/helpermethods.js'
+import { ref } from 'vue'
+import Button from 'primevue/button'
+import Card from 'primevue/card'
 
 const polls = ref([])
 const error = ref(null)
-const voteOptions = ref([])
 
-async function handleVote(voteOption){
-  addVote(voteOption);
-  polls.value = await getPolls();
-  voteOptions.value = await getVoteOptions();
+async function handleVote(voteOption) {
+  try {
+    const result = await addVote(voteOption)
+
+    if (result) {
+      const pollId = voteOption.pollId
+      const voteId = result.id
+      const poll = polls.value.find(poll => poll.id === pollId)
+      if (poll) {
+        const voption = poll.voteOptions.find(
+          voption => voption.id === voteOption.id,
+        )
+        if (voption) {
+          voption.votes.push({
+            id: voteId,
+            publishedAt: Date.now(),
+            voteOptionId: voption.id,
+            pollQuestion: poll.question,
+            voteOptionCaption: voption.caption,
+            pollId: poll.id,
+          })
+        }
+      }
+    }
+  } catch (error) {
+    console.log(error)
+  }
 }
 
 try {
   polls.value = await getPolls()
-  voteOptions.value = await getVoteOptions()
-
 } catch (e) {
   error.value = e
 }
-
 
 async function handleDeletePoll(pollId) {
   try {
@@ -30,10 +49,7 @@ async function handleDeletePoll(pollId) {
   } catch (error) {
     console.log(error)
   }
-
 }
-
-
 </script>
 
 <template>
@@ -48,16 +64,20 @@ async function handleDeletePoll(pollId) {
         </template>
         <template #content>
           <ul>
-            <li v-for="voteoption in voteOptions.filter(option => option.pollId === poll.id)" :key="voteoption.id">
+            <li v-for="voteoption in poll.voteOptions" :key="voteoption.id">
               <h3>{{ voteoption.caption }}</h3>
               <Button label="Upvote" @click="handleVote(voteoption)"></Button>
-              <h4>Number of votes: {{voteoption.votes.length}}</h4>
+              <h4>Number of votes: {{ voteoption.votes.length }}</h4>
             </li>
           </ul>
         </template>
         <template #footer>
           <div class="footer">
-            <Button label="Delete Poll" class="delete" @click="handleDeletePoll(poll.id)" ></Button>
+            <Button
+              label="Delete Poll"
+              class="delete"
+              @click="handleDeletePoll(poll.id)"
+            ></Button>
           </div>
         </template>
       </Card>
@@ -66,7 +86,6 @@ async function handleDeletePoll(pollId) {
 </template>
 
 <style scoped>
-
 div.container {
   display: flex;
   flex-wrap: wrap;
@@ -97,7 +116,6 @@ div.poll {
 .card {
   width: fit-content;
   height: fit-content;
-
 }
 
 div.footer {
@@ -105,6 +123,4 @@ div.footer {
   display: flex;
   justify-content: center;
 }
-
-
 </style>
