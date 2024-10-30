@@ -55,6 +55,7 @@ public class PollService {
 
        Poll retrievedPoll = retrievedPollOpt.get();
 
+       retrievedPoll.setQuestion(updatedPoll.getQuestion());
        retrievedPoll.setPublishedAt(updatedPoll.getPublishedAt());
        retrievedPoll.setValidUntil(updatedPoll.getValidUntil());
 
@@ -86,6 +87,7 @@ public class PollService {
        repo.delete(poll);
        return repo.findById(poll.getId()).isEmpty();
    }
+
    /**
     *@param id the id of the poll that you want to delete
     *@return True if the poll was deleted, false if not
@@ -105,6 +107,8 @@ public class PollService {
        repo.deleteById(id);
        return repo.findById(id).isEmpty();
    }
+
+
    /**
     * @param poll the poll that you want to add to the database
     * @returns the added poll or throws an exception if it was

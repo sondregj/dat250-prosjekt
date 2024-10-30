@@ -9,6 +9,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -27,8 +28,11 @@ public class Vote implements Serializable {
     private Long id;
     private Instant publishedAt;
 
+    @Column(nullable = true)
+    private String guestId;
+
     @ManyToOne
-    @JoinColumn(name="user_id")
+    @JoinColumn(name="user_id", nullable = true)
     @JsonBackReference(value = "votes-User")
     private User user;
 
@@ -40,6 +44,7 @@ public class Vote implements Serializable {
     public Vote(Instant publishedAt){
         this.publishedAt = publishedAt.atZone(ZoneOffset.UTC).toInstant().truncatedTo(ChronoUnit.SECONDS);
     }
+
 
     public Vote() {}
 
@@ -73,6 +78,14 @@ public class Vote implements Serializable {
 
     public void setVoteOption(VoteOption voteOption) {
         this.voteOption = voteOption;
+    }
+
+    public String getGuestId() {
+        return guestId;
+    }
+
+    public void setGuestId(String guestId) {
+        this.guestId = guestId;
     }
 
     @JsonProperty("pollId")
