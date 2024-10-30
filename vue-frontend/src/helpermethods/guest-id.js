@@ -15,4 +15,8 @@ export function generateUUID(){
   });
 }
 
+export function isLoggedIn(){
+  return localStorage.getItem('guestId') === null;
+}
+
 
