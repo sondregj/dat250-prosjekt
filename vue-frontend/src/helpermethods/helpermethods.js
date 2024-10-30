@@ -157,6 +157,29 @@ export async function addVote(voteoption) {
   }
 }
 
+export async function addVoteGuest(voteoption) {
+  try {
+    const response = await fetch('http://localhost:8080/api/votes', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Guest-Id': localStorage.getItem('guestId'),
+      },
+      body: JSON.stringify({
+        publishedAt: Date.now(),
+        voteOption: voteoption,
+      }),
+    })
+    if (!response.ok) {
+      throw new Error('Http error! Status: ' + response.status)
+    }
+    return await response.json()
+  } catch (error) {
+    console.error('Failed to fetch polls', error)
+    return null
+  }
+}
+
 export async function deletePoll(pollId) {
   try {
     const response = await fetch(`http://localhost:8080/api/polls/${pollId}`, {

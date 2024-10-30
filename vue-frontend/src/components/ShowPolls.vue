@@ -30,7 +30,6 @@ async function handleDeletePoll(pollId) {
   } catch (error) {
     console.log(error)
   }
-
 }
 
 
