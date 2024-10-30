@@ -1,6 +1,9 @@
 package no.hvl.dat250.polls.Repository;
 
 import no.hvl.dat250.polls.models.User;
+
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -16,5 +19,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
 
     @Query("SELECT u FROM User u WHERE u.username = :username")
-    User findByUsername(@Param("username") String username);
+    Optional<User> findByUsername(@Param("username") String username);
 }

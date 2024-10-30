@@ -1,7 +1,6 @@
 package no.hvl.dat250.polls.controllers;
 
 import no.hvl.dat250.polls.config.JwtService;
-import no.hvl.dat250.polls.models.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;

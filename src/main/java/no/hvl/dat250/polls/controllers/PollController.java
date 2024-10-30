@@ -1,14 +1,12 @@
 package no.hvl.dat250.polls.controllers;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,6 +38,7 @@ public class PollController {
     @Autowired
     UserService UserService;
 
+    //Does not need to be logged in
     @GetMapping
     public ResponseEntity<List<Poll>> getPolls(){
         List<Poll> retrievedPolls = service.getAllPolls();
@@ -49,6 +48,7 @@ public class PollController {
         return new ResponseEntity<>(retrievedPolls, HttpStatus.OK);
     }
 
+    //Does not need to be logged in
     @GetMapping("/id")
     public ResponseEntity<Poll> getPollById(@PathVariable Long id){
         Poll retrievedPoll = service.getPollById(id)
@@ -57,10 +57,16 @@ public class PollController {
         return new ResponseEntity<>(retrievedPoll, HttpStatus.OK);
     }
 
+    // Needs to be logged in
     @PostMapping
     public ResponseEntity<Object> postPoll(@RequestBody Poll poll, Authentication authentication){
+        if (authentication == null){
+            return new ResponseEntity<>(new AccessDeniedException("You need to be logged in to post a poll"),
+                                        HttpStatus.UNAUTHORIZED);
+        }
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        User user = UserService.getUserByUsername(userDetails.getUsername());
+        User user = UserService.getUserByUsername(userDetails.getUsername())
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
 
         poll.setCreator(user);
         Poll postedPoll = service.addPoll(poll);
@@ -89,8 +95,12 @@ public class PollController {
     //     return new ResponseEntity<>(retrievedPoll.get(), HttpStatus.OK);
     // }
 
+    //Needs to be logged in
     @DeleteMapping("/{id}")
     public ResponseEntity<Poll> removePollById(@PathVariable Long id, Authentication authentication){
+        if (authentication == null){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         Poll poll = service.getPollById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Poll not found"));
@@ -106,22 +116,23 @@ public class PollController {
         return new ResponseEntity<>(poll, HttpStatus.OK);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Poll> updatePoll(@PathVariable("id") Long id, 
-            @RequestBody Poll updatedPoll,
-            Authentication authentication){
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        Poll existingPoll = service.getPollById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Poll not found"));
-
-        if (!existingPoll.getCreator().getUsername().equals(userDetails.getUsername())){
-            throw new AccessDeniedException("You can only modify your own poll");
-        }
-        Poll updated = service.updatePoll(id, updatedPoll)
-            .orElseThrow(() -> new OperationFailedError("Failed to update poll"));
-
-        return new ResponseEntity<>(updated, HttpStatus.OK);
-           
-
-    }
+    //Needs to be logged in // Maybe not a needed method at all? //Only for admin?
+    // @PutMapping("/{id}")
+    // public ResponseEntity<Poll> updatePoll(@PathVariable("id") Long id, 
+    //         @RequestBody Poll updatedPoll,
+    //         Authentication authentication){
+    //     UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+    //     Poll existingPoll = service.getPollById(id)
+    //         .orElseThrow(() -> new ResourceNotFoundException("Poll not found"));
+    //
+    //     if (!existingPoll.getCreator().getUsername().equals(userDetails.getUsername())){
+    //         throw new AccessDeniedException("You can only modify your own poll");
+    //     }
+    //     Poll updated = service.updatePoll(id, updatedPoll)
+    //         .orElseThrow(() -> new OperationFailedError("Failed to update poll"));
+    //
+    //     return new ResponseEntity<>(updated, HttpStatus.OK);
+    //       
+    //
+    // }
 }

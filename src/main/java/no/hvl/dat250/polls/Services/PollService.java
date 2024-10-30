@@ -108,6 +108,7 @@ public class PollService {
        return repo.findById(id).isEmpty();
    }
 
+
    /**
     * @param poll the poll that you want to add to the database
     * @returns the added poll or throws an exception if it was
