@@ -50,10 +50,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth ->
                 auth
                     // TODO: Add more specific rules
-                    .requestMatchers("/api/auth/**", "/api/users")
+                    // .anyRequest()
+                    // .authenticated()
+                    .requestMatchers("/**")
                     .permitAll()
-                    .anyRequest()
-                    .authenticated()
             );
 
         return http.build();
