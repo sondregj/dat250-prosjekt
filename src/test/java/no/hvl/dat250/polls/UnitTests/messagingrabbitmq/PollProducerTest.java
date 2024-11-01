@@ -41,8 +41,8 @@ public class PollProducerTest {
         voteOption2.setId(2L);
         voteOption2.setPoll(poll);
 
-        poll.getVoteOptions().add(voteOption1);
-        poll.getVoteOptions().add(voteOption2);
+        poll.getVoteOptionMutable().add(voteOption1);
+        poll.getVoteOptionMutable().add(voteOption2);
         poll.setId(1L);
         poll.setCreator(user);
         user.setCreatedPolls(List.of(poll));
