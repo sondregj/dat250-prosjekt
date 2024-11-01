@@ -46,8 +46,8 @@ public class Poll implements Serializable {
 
     public Poll(String question, Instant publishedAt, Instant validUntil){
         this.question = question;
-        this.publishedAt = publishedAt;
-        this.validUntil = validUntil;
+        this.publishedAt = publishedAt.truncatedTo(ChronoUnit.SECONDS);
+        this.validUntil = validUntil.truncatedTo(ChronoUnit.SECONDS);
         this.voteOptions = new ArrayList<>();
     }
 
