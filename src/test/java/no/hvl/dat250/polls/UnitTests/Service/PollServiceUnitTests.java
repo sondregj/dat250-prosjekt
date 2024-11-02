@@ -14,11 +14,13 @@ import org.springframework.test.context.ActiveProfiles;
 
 import jakarta.transaction.Transactional;
 import no.hvl.dat250.polls.Repository.PollRepository;
+import no.hvl.dat250.polls.Repository.UserRepository;
 import no.hvl.dat250.polls.Repository.VoteOptionRepository;
 import no.hvl.dat250.polls.Services.PollService;
 import no.hvl.dat250.polls.Services.VoteOptionService;
 import no.hvl.dat250.polls.models.Poll;
 import no.hvl.dat250.polls.models.VoteOption;
+import no.hvl.dat250.polls.models.User;
 
 /**
  * ServiceTests
@@ -31,11 +33,13 @@ public class PollServiceUnitTests {
     @Autowired PollRepository repo;
     @Autowired VoteOptionRepository vRepo;
     @Autowired VoteOptionService vService;
+    @Autowired UserRepository uRepo;
 
     @BeforeEach
     void setUp(){
         repo.deleteAll();
         vRepo.deleteAll();
+        uRepo.deleteAll();
     }
 
 
@@ -119,7 +123,10 @@ public class PollServiceUnitTests {
     @Test
     void testDeletePoll(){
         //Add a poll with two voteoptions
+        User user = new User("Jonas", "Jonas@email.com", "123");
+        uRepo.save(user);
         Poll poll1 = new Poll("Poll 1", Instant.now(), Instant.now().plusSeconds(3600));
+        poll1.setCreator(user);
         VoteOption option1 = new VoteOption("VO1", 1);
         option1.setPoll(poll1);
         VoteOption option2 = new VoteOption("VO2", 2);
