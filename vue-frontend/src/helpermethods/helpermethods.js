@@ -189,7 +189,7 @@ export async function addVote(voteoption) {
     }
     return await response.json()
   } catch (error) {
-    console.error('Failed to fetch polls', error)
+    console.error('Failed to vote', error)
     return null
   }
 }
@@ -200,7 +200,7 @@ export async function addVoteGuest(voteoption) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Guest-Id': localStorage.getItem('guestId'),
+        'GuestId': localStorage.getItem('guest-id'),
       },
       body: JSON.stringify({
         publishedAt: Date.now(),
@@ -212,7 +212,7 @@ export async function addVoteGuest(voteoption) {
     }
     return await response.json()
   } catch (error) {
-    console.error('Failed to fetch polls', error)
+    console.error('Failed to vote', error)
     return null
   }
 }

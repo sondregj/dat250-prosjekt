@@ -1,5 +1,5 @@
 <script setup>
-import { addVote, getPolls, deletePoll, getPoll } from '@/helpermethods/helpermethods.js'
+import { addVote, getPolls, deletePoll, getPoll, addVoteGuest } from '@/helpermethods/helpermethods.js'
 import { ref } from 'vue'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
@@ -9,7 +9,16 @@ const error = ref(null)
 
 async function handleVote(voteOption) {
   try {
-    const result = await addVote(voteOption)
+
+  let result = null;
+
+  if (localStorage.getItem("JWT")){
+    result = await addVote(voteOption)
+  } else if(localStorage.getItem("guest-id")){
+    result = await addVoteGuest(voteOption)
+  } else {
+    alert("You have to be logged in as either a guest or a user to vote");
+  }
 
     if (result) {
       //const pollId = voteOption.pollId
