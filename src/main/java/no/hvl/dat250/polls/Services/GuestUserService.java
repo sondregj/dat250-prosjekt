@@ -20,5 +20,11 @@ public class GuestUserService {
     public Optional<guestUser> getGuestById(String id){
         return repo.findById(id);
     }
+
+    public guestUser registerGuestUser(){
+        guestUser user = new guestUser();
+        System.out.println(user.toString());
+        return repo.save(user);
+    }
     
 }

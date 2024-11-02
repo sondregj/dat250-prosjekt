@@ -1,4 +1,17 @@
-<script setup></script>
+<script setup>
+import { onMounted } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+
+// Check for authentication on mount
+onMounted(() => {
+  const hasToken = localStorage.getItem('jwt') || localStorage.getItem('guest-id')
+  if (!hasToken) {
+    router.push('/signup')
+  }
+})
+</script>
 
 <template>
   <header>
@@ -18,3 +31,4 @@
 </template>
 
 <style scoped></style>
+

@@ -1,3 +1,30 @@
+export function createGuestUser() {
+  fetch('http://localhost:8080/api/guest', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(response => {
+    if (response.status === 201) {
+      return response.json(); // Return the promise here to chain the next .then()
+    } else {
+      return response.json().then(errorData => {
+        console.log("Could not create user: ", errorData);
+        throw new Error("Guest user creation failed");
+      });
+    }
+  })
+  .then(data => {
+    console.log(data);
+    localStorage.setItem("guest-id", data.guestId);
+    console.log("Logged in as guest user with id: " + data.guestId);
+  })
+  .catch(error => {
+    console.log("Error: " + error.message);
+  });
+}
+
+
+
 export function createNewUser(username, password, email) {
   fetch('http://localhost:8080/api/users', {
     method: 'POST',

@@ -47,6 +47,14 @@ public class guestUser {
         return this.validUntil;
     }
 
+    public String getGuestId(){
+        return this.guestId;
+    }
+
+    public void setGuestId(String newId){
+        this.guestId = newId;
+    }
+
      @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -68,5 +76,4 @@ public class guestUser {
                 ", votes=" + votes +
                 '}';
     }
-    
 }
