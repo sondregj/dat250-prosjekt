@@ -28,7 +28,8 @@ public class Vote implements Serializable {
     private Long id;
     private Instant publishedAt;
 
-    @Column(nullable = true)
+    @ManyToOne
+    @Column(name="guest_id", nullable = true)
     private String guestId;
 
     @ManyToOne

@@ -108,5 +108,21 @@ public class VoteService {
         return Optional.of(repo.save(oldVote));
     }
 
+    public Optional<Vote> findUserVoteOnPoll(User user, Vote vote){
+        VoteOption retrievdVO = vRepo.getReferenceById(vote.getVoteOption().getId());
+        return retrievdVO.getPoll().getVoteOptions().stream()
+            .flatMap(vo -> vo.getVotes().stream())
+            .filter(v -> v.getUser().equals(user))
+            .findAny();
+    }
+
+    public Optional<Vote> findGuestVoteOnPoll(String guestId, Vote vote){
+        VoteOption retrievdVO = vRepo.getReferenceById(vote.getVoteOption().getId());
+        return retrievdVO.getPoll().getVoteOptions().stream()
+            .flatMap(vo -> vo.getVotes().stream())
+            .filter(v -> v.getGuestId().equals(guestId))
+            .findAny();
+    }
+
 }
     

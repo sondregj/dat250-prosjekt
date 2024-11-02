@@ -1,4 +1,3 @@
-/**
 package no.hvl.dat250.polls.UnitTests.messagingrabbitmq;
 
 import no.hvl.dat250.polls.messagingrabbitmq.PollProducer;
@@ -104,4 +103,4 @@ public class PollProducerTest {
         }
     }
 }
-*/
+
