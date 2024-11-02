@@ -31,8 +31,9 @@ async function handleVote(voteOption) {
       //  }
       //}
       let retrievedPoll = await getPoll(voteOption.pollId);
-      const poll = polls.value.find(poll => poll.id === retrievedPoll.id)
-      poll.voteOptions = retrievedPoll.voteOptions
+      polls.value
+      .find(poll => poll.id === retrievedPoll.id)
+      .voteOptions = retrievedPoll.voteOptions
     }
   } catch (error) {
     console.log(error)

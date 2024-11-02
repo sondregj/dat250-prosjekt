@@ -81,39 +81,42 @@ public class PollController {
         return new ResponseEntity<>(postedPoll, HttpStatus.CREATED);
     }
 
-    // @DeleteMapping
-    // public ResponseEntity<Object> removePoll(@RequestBody Poll poll, Authentication authentication){
-    //     UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-    //     Optional<Poll> retrievedPoll = service.getPollById(poll.getId());
-    //
-    //     if (retrievedPoll.isEmpty()){
-    //         return new ResponseEntity<>(new Error("Did not find poll"), HttpStatus.NOT_FOUND);
-    //     }
-    //
-    //     Poll existingPoll = retrievedPoll.get();
-    //     if (!existingPoll.getCreator().getUsername().equals(userDetails.getUsername())){
-    //         return new ResponseEntity<>(new Error("You can only delete your own polls"),
-    //                                         HttpStatus.FORBIDDEN);
-    //     }
-    //
-    //     if (!service.deletePoll(retrievedPoll.get())){
-    //         return new ResponseEntity<>(new Error("Could not delete poll"), 
-    //                                         HttpStatus.INTERNAL_SERVER_ERROR);
-    //     }
-    //     return new ResponseEntity<>(retrievedPoll.get(), HttpStatus.OK);
-    // }
+    @DeleteMapping
+    public ResponseEntity<Object> removePoll(@RequestBody Poll poll, Authentication authentication){
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        String username = jwt.getClaimAsString("sub");
+        Optional<Poll> retrievedPoll = service.getPollById(poll.getId());
+    
+        if (retrievedPoll.isEmpty()){
+            return new ResponseEntity<>(new Error("Did not find poll"), HttpStatus.NOT_FOUND);
+        }
+    
+        Poll existingPoll = retrievedPoll.get();
+        if (!existingPoll.getCreator().getUsername().equals(username)){
+            return new ResponseEntity<>(new Error("You can only delete your own polls"),
+                                            HttpStatus.FORBIDDEN);
+        }
+    
+        if (!service.deletePoll(retrievedPoll.get())){
+            return new ResponseEntity<>(new Error("Could not delete poll"), 
+                                            HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<>(retrievedPoll.get(), HttpStatus.OK);
+    }
 
-    //Needs to be logged in
     @DeleteMapping("/{id}")
     public ResponseEntity<Poll> removePollById(@PathVariable Long id, Authentication authentication){
         if (authentication == null){
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        String username = jwt.getClaimAsString("sub");
+        User user = UserService.getUserByUsername(username)
+            .orElseThrow(() -> new ResourceNotFoundException("User not found"));
         Poll poll = service.getPollById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Poll not found"));
 
-        if (!poll.getCreator().getUsername().equals(userDetails.getUsername())){
+        if (!poll.getCreator().getUsername().equals(username)){
             throw new AccessDeniedException("You can only delete your own polls");
         }
 

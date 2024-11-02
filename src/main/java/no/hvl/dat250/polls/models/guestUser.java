@@ -4,6 +4,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.TemporalAmount;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 import jakarta.persistence.Entity;
@@ -22,7 +23,7 @@ public class guestUser {
     private String guestId;
     private Instant validUntil;
 
-    @OneToMany(mappedBy = "guestId")
+    @OneToMany(mappedBy = "guest")
     private List<Vote> votes;
 
     public guestUser(){
@@ -46,6 +47,26 @@ public class guestUser {
         return this.validUntil;
     }
 
+     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        guestUser guestUser = (guestUser) o;
+        return Objects.equals(guestId, guestUser.guestId);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(guestId);
+    }
+
+    @Override
+    public String toString() {
+        return "guestUser{" +
+                "guestId='" + guestId + '\'' +
+                ", validUntil=" + validUntil +
+                ", votes=" + votes +
+                '}';
+    }
     
 }

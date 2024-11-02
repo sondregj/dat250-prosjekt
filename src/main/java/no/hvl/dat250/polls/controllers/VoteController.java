@@ -18,14 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import no.hvl.dat250.polls.Error.OperationFailedError;
 import no.hvl.dat250.polls.Error.ResourceNotFoundException;
-import no.hvl.dat250.polls.Services.PollService;
+import no.hvl.dat250.polls.Services.GuestUserService;
 import no.hvl.dat250.polls.Services.UserService;
 import no.hvl.dat250.polls.Services.VoteOptionService;
 import no.hvl.dat250.polls.Services.VoteService;
-import no.hvl.dat250.polls.models.Poll;
 import no.hvl.dat250.polls.models.User;
 import no.hvl.dat250.polls.models.Vote;
-import no.hvl.dat250.polls.models.VoteOption;
+import no.hvl.dat250.polls.models.guestUser;
 
 /**
  * VoteController
@@ -39,6 +38,7 @@ public class VoteController {
     @Autowired VoteService service;
     @Autowired UserService userService;
     @Autowired VoteOptionService voService;
+    @Autowired GuestUserService guService;
 
     // @GetMapping
     // public ResponseEntity<List<Vote>> getAllVotes(){
@@ -79,7 +79,9 @@ public class VoteController {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
         } else {
-            if (!vote.getGuestId().equals(guestId)){
+            guestUser guest = guService.getGuestById(guestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Guest user not found"));
+            if (!vote.getGuest().equals(guest)){
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
@@ -114,8 +116,10 @@ public class VoteController {
                 return new ResponseEntity<>(vote, HttpStatus.CREATED);
             }
         } else {
-            createdVote.setGuestId(guestId);
-            Optional<Vote> existingVote = service.findGuestVoteOnPoll(guestId, createdVote);
+            guestUser guest = guService.getGuestById(guestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Guest user not found"));
+            createdVote.setGuest(guest);
+            Optional<Vote> existingVote = service.findGuestVoteOnPoll(guest, createdVote);
             if (existingVote.isPresent()){
                 Vote oldVote = existingVote.get();
                 Vote vote = service.updateVote(oldVote.getId(), createdVote)

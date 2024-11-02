@@ -145,7 +145,6 @@ export async function addVote(voteoption) {
   if (!token){
     throw new Error("You need to be authorized to create a poll");
   }
-  console.log(voteoption.pollId)
   try {
     const response = await fetch('http://localhost:8080/api/votes', {
       method: 'POST',
@@ -192,12 +191,16 @@ export async function addVoteGuest(voteoption) {
 }
 
 export async function deletePoll(pollId) {
+  const token = localStorage.getItem("JWT");
+  if (!token){
+    throw new Error("You need to be authorized to create a poll");
+  }
   try {
     const response = await fetch(`http://localhost:8080/api/polls/${pollId}`, {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': localStorage.getItem('JWT'),
+        'Authorization': `Bearer ${token}`
       }
     })
 
@@ -209,6 +212,7 @@ export async function deletePoll(pollId) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
     console.log(`Poll with ID ${pollId} deleted successfully`, response)
+    return response.json()
   } catch (error) {
     console.error(`Failed to delete poll with ID ${pollId}`, error)
     throw error

@@ -6,6 +6,7 @@ import java.util.Optional;
 import no.hvl.dat250.polls.models.User;
 import no.hvl.dat250.polls.models.Vote;
 import no.hvl.dat250.polls.models.VoteOption;
+import no.hvl.dat250.polls.models.guestUser;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -116,11 +117,11 @@ public class VoteService {
             .findAny();
     }
 
-    public Optional<Vote> findGuestVoteOnPoll(String guestId, Vote vote){
+    public Optional<Vote> findGuestVoteOnPoll(guestUser guest, Vote vote){
         VoteOption retrievdVO = vRepo.getReferenceById(vote.getVoteOption().getId());
         return retrievdVO.getPoll().getVoteOptions().stream()
             .flatMap(vo -> vo.getVotes().stream())
-            .filter(v -> v.getGuestId().equals(guestId))
+            .filter(v -> v.getGuest().equals(guest))
             .findAny();
     }
 
