@@ -35,6 +35,9 @@ public class guestUser {
         return UUID.randomUUID().toString();
     }
 
+    /**
+     *Extends the validUntil of the guest user by STANDARD_DURATION_HOURS(3)
+     */
     public void extendValidUntil(){
         this.validUntil = Instant.now().plus(STANDARD_DURATION_HOURS);
     }

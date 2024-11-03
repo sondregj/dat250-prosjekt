@@ -79,8 +79,8 @@ public class VoteController {
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
         } else {
-            guestUser guest = guService.getGuestById(guestId)
-                .orElseThrow(() -> new ResourceNotFoundException("Guest user not found"));
+            guestUser guest = guService.getCheckAndExtendById(guestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Guest user not found or expired"));
             if (!vote.getGuest().equals(guest)){
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
@@ -93,33 +93,45 @@ public class VoteController {
     }
 
     @PostMapping
-    public ResponseEntity<Vote> createVote(@RequestBody Vote createdVote,
+    public ResponseEntity<?> createVote(@RequestBody Vote createdVote,
             @RequestHeader(value = "GuestId", required = false) 
             String guestId,
             Authentication authentication){
-        System.out.println("CreatedVote: " + createdVote);
+        //Checks that there is some form of authentication
         if (authentication == null && guestId == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
-
+        //Handles the request if the auth is a JWT token
         if (authentication != null){
             Jwt token = (Jwt) authentication.getPrincipal();
             String username = token.getClaimAsString("sub");
-            User user = userService.getUserByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+            Optional<User> userOpt = userService.getUserByUsername(username);
+            if (userOpt.isEmpty()){
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResourceNotFoundException("Could not find user with username: " + username));
+            }
+            User user = userOpt.get();
             createdVote.setUser(user);
             Optional<Vote> existingVote = service.findUserVoteOnPoll(user, createdVote);
+            //If the user already has a vote on this poll
             if (existingVote.isPresent()){
                 Vote oldVote = existingVote.get();
                 Vote vote = service.updateVote(oldVote.getId(), createdVote)
                     .orElseThrow(() -> new OperationFailedError("Could not update Vote"));
                 return new ResponseEntity<>(vote, HttpStatus.CREATED);
             }
+            //Handles the request if the authentication is a guest-id header
         } else {
-            guestUser guest = guService.getGuestById(guestId)
-                .orElseThrow(() -> new ResourceNotFoundException("Guest user not found"));
+            Optional<guestUser> guestUser = guService.getCheckAndExtendById(guestId);
+            if (guestUser.isEmpty()){
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new ResourceNotFoundException("Guest user not found or expired")
+                        );
+            }
+            guestUser guest = guestUser.get();
             createdVote.setGuest(guest);
             Optional<Vote> existingVote = service.findGuestVoteOnPoll(guest, createdVote);
+            //If the guestid already has a vote on this poll
             if (existingVote.isPresent()){
                 Vote oldVote = existingVote.get();
                 Vote vote = service.updateVote(oldVote.getId(), createdVote)
