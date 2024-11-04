@@ -36,7 +36,7 @@ const handleSubmit = async () => {
     localStorage.removeItem('guest-id')
     console.log("Removed guest-id")
     resetForm();
-    router.push("/");
+    await router.push("/");
   } catch(error){
     console.error("Error during creation or login: ", error.message);
   }
@@ -48,7 +48,7 @@ const handleSubmitLogin = async () => {
     localStorage.removeItem('guest-id')
     console.log("Removed guest-id")
     resetForm()
-    router.push("/")
+    await router.push("/")
   } catch(error){
     console.error("Error during creation or login: ", error.message);
   }
