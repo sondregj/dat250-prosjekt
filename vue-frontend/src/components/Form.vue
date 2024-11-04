@@ -18,10 +18,14 @@ const resetForm = () => {
   email.value = ''
 }
 
-const handleGuest = async () => {
-  createGuestUser()
-  resetForm()
-  router.push("/")
+const handleGuest = () => {
+
+  try{
+    createGuestUser()
+    router.push("/")
+  } catch (error){
+    alert("Error during guest init: " + error);
+  }
 }
 
 const handleSubmit = async () => {
