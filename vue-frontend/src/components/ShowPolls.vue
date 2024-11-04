@@ -17,7 +17,16 @@ const error = ref(null)
 
 async function handleVote(voteOption) {
   try {
-    const result = await addVote(voteOption)
+
+  let result = null;
+
+  if (localStorage.getItem("JWT")){
+    result = await addVote(voteOption)
+  } else if(localStorage.getItem("guest-id")){
+    result = await addVoteGuest(voteOption)
+  } else {
+    alert("You have to be logged in as either a guest or a user to vote");
+  }
 
     if (result) {
       //const pollId = voteOption.pollId
@@ -39,6 +48,7 @@ async function handleVote(voteOption) {
       //  }
       //}
       let retrievedPoll = await getPoll(voteOption.pollId);
+
       polls.value
       .find(poll => poll.id === retrievedPoll.id)
       .voteOptions = retrievedPoll.voteOptions

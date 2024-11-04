@@ -3,12 +3,14 @@ import Button from 'primevue/button'
 import FloatLabel from 'primevue/floatlabel'
 import Password from 'primevue/password'
 import InputText from 'primevue/inputtext'
-import { createNewUser, loginUser } from '../helpermethods/helpermethods.js'
+import { useRouter } from 'vue-router'
+import { createNewUser, loginUser, createGuestUser } from '../helpermethods/helpermethods.js'
 
 const username = defineModel('username')
 const password = defineModel('password')
 const email = defineModel('email')
-const props = defineProps(['message', 'signup', 'buttonText'])
+const props = defineProps(['message', 'signup', 'buttonText', 'guestText'])
+const router = useRouter()
 
 const resetForm = () => {
   username.value = ''
@@ -16,14 +18,36 @@ const resetForm = () => {
   email.value = ''
 }
 
-const handleSubmit = async () => {
-  await createNewUser(username.value, password.value, email.value)
+const handleGuest = async () => {
+  createGuestUser()
   resetForm()
+  router.push("/")
+}
+
+const handleSubmit = async () => {
+  try{
+    createNewUser(username.value, password.value, email.value);
+    await new Promise(resolve => setTimeout(resolve, 400));
+    loginUser(username.value, password.value);
+    localStorage.removeItem('guest-id')
+    console.log("Removed guest-id")
+    resetForm();
+    router.push("/");
+  } catch(error){
+    console.error("Error during creation or login: ", error.message);
+  }
 }
 
 const handleSubmitLogin = async () => {
-  loginUser(username.value, password.value)
-  resetForm()
+  try{
+    loginUser(username.value, password.value)
+    localStorage.removeItem('guest-id')
+    console.log("Removed guest-id")
+    resetForm()
+    router.push("/")
+  } catch(error){
+    console.error("Error during creation or login: ", error.message);
+  }
 }
 </script>
 
@@ -60,6 +84,12 @@ const handleSubmitLogin = async () => {
         v-else
         @click="handleSubmitLogin"
       ></Button>
+    </div>
+    <div class="button">
+      <Button
+        :label="props.guestText"
+        @click="handleGuest"
+        ></Button>
     </div>
   </div>
 </template>

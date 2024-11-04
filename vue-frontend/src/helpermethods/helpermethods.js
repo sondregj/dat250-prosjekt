@@ -1,3 +1,30 @@
+export function createGuestUser() {
+  fetch('http://localhost:8080/api/guest', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' }
+  })
+  .then(response => {
+    if (response.status === 201) {
+      return response.json(); // Return the promise here to chain the next .then()
+    } else {
+      return response.json().then(errorData => {
+        console.log("Could not create user: ", errorData);
+        throw new Error("Guest user creation failed");
+      });
+    }
+  })
+  .then(data => {
+    console.log(data);
+    localStorage.setItem("guest-id", data.guestId);
+    console.log("Logged in as guest user with id: " + data.guestId);
+  })
+  .catch(error => {
+    console.log("Error: " + error.message);
+  });
+}
+
+
+
 export function createNewUser(username, password, email) {
   fetch('http://localhost:8080/api/users', {
     method: 'POST',
@@ -158,7 +185,7 @@ export async function getPolls() {
 export async function addVote(voteoption) {
   const token = localStorage.getItem("JWT");
   if (!token){
-    throw new Error("You need to be authorized to create a poll");
+    throw new Error("You need to be authorized to vote");
   }
   try {
     const response = await fetch('http://localhost:8080/api/votes', {
@@ -177,7 +204,7 @@ export async function addVote(voteoption) {
     }
     return await response.json()
   } catch (error) {
-    console.error('Failed to fetch polls', error)
+    console.error('Failed to vote', error)
     return null
   }
 }
@@ -188,7 +215,7 @@ export async function addVoteGuest(voteoption) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Guest-Id': localStorage.getItem('guestId'),
+        'GuestId': localStorage.getItem('guest-id'),
       },
       body: JSON.stringify({
         publishedAt: Date.now(),
@@ -200,7 +227,7 @@ export async function addVoteGuest(voteoption) {
     }
     return await response.json()
   } catch (error) {
-    console.error('Failed to fetch polls', error)
+    console.error('Failed to vote', error)
     return null
   }
 }
@@ -208,7 +235,7 @@ export async function addVoteGuest(voteoption) {
 export async function deletePoll(pollId) {
   const token = localStorage.getItem("JWT");
   if (!token){
-    throw new Error("You need to be authorized to create a poll");
+    throw new Error("You need to be authorized to delete a poll");
   }
   try {
     const response = await fetch(`http://localhost:8080/api/polls/${pollId}`, {
