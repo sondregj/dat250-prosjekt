@@ -1,5 +1,13 @@
 <script setup>
-import { addVote, getPolls, deletePoll, getPoll, addVoteGuest } from '@/helpermethods/helpermethods.js'
+
+import {
+  addVote,
+  getPolls,
+  deletePoll,
+  getPoll,
+  checkPollExpired,
+} from '@/helpermethods/helpermethods.js'
+
 import { ref } from 'vue'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
@@ -52,6 +60,7 @@ async function handleVote(voteOption) {
 
 try {
   polls.value = await getPolls()
+  setInterval(() => checkPollExpired(polls.value), 10 * 60 * 1000) //will run every 10 min
 } catch (e) {
   error.value = e
 }
@@ -77,10 +86,20 @@ async function handleDeletePoll(pollId) {
           {{ poll.question }}
         </template>
         <template #content>
+          <p class="expired" v-if="poll.validUntil === 0">Poll Expired</p>
           <ul>
             <li v-for="voteoption in poll.voteOptions" :key="voteoption.id">
               <h3>{{ voteoption.caption }}</h3>
-              <Button label="Upvote" @click="handleVote(voteoption)"></Button>
+              <Button
+                v-if="poll.validUntil === 0"
+                label="Upvote"
+                disabled
+              ></Button>
+              <Button
+                v-else
+                label="Upvote"
+                @click="handleVote(voteoption)"
+              ></Button>
               <h4>Number of votes: {{ voteoption.votes.length }}</h4>
             </li>
           </ul>
@@ -137,4 +156,9 @@ div.footer {
   display: flex;
   justify-content: center;
 }
+
+p.expired {
+  color: red;
+}
+
 </style>

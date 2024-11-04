@@ -88,21 +88,33 @@ export function loginUser(username, password) {
     })
 }
 
-export function createNewPoll(question, hoursvalid, voteoptions) {
-  const now = new Date()
-  const validUntil = new Date(now)
-  const token = localStorage.getItem("JWT");
+export function createNewPoll(question, hoursValid, voteOptions) {
+
+  const now = new Date();
+  let validUntil = new Date();
+
+  console.log("Hours valid: ", hoursValid)
+  
+  
   if (!token){
     throw new Error("You need to be authorized to create a poll");
   }
-  validUntil.setHours(now.getHours() + hoursvalid)
+
+  if(hoursValid > 0) {
+     validUntil.setTime(validUntil.getTime() + hoursValid * 60 * 60 * 1000) //adds x amount of hours
+  }
+
+  console.log('Valid until after', validUntil)
+
+
+
   fetch('http://localhost:8080/api/polls', {
     method: 'POST',
     body: JSON.stringify({
       question: question,
       publishedAt: now.getTime(),
       validUntil: validUntil.getTime(),
-      voteOptions: voteoptions,
+      voteOptions: voteOptions,
     }),
     headers: {
       'Content-Type': 'application/json',
@@ -111,6 +123,9 @@ export function createNewPoll(question, hoursvalid, voteoptions) {
   })
     .then(response => {
       if (response.status === 201) {
+          question = ''
+        hoursValid = 0
+        voteOptions = []
         console.log('poll created successfully')
       } else {
         return response.json().then(data => {
@@ -242,6 +257,51 @@ export async function deletePoll(pollId) {
     return response.json()
   } catch (error) {
     console.error(`Failed to delete poll with ID ${pollId}`, error)
+    throw error
+  }
+}
+
+export async function checkPollExpired(polls) {
+  console.log('checking if poll is expired')
+
+  for (const poll of polls) {
+    const validUntil = poll.validUntil
+    console.log('valid until before formatting: ', validUntil)
+    const currentTime = Date.now()
+    console.log('current time: ', currentTime)
+    if (validUntil < currentTime) {
+
+      const expiredPoll = {
+        ...poll,
+        validUntil: 0
+      }
+
+      await updatePoll(expiredPoll) //sets the poll object as expired in the database
+      poll.validUntil = 0 //marks the poll as expired locally
+      console.log(`Poll with id ${poll.id} is expired`)
+    }
+  }
+}
+
+
+export async function updatePoll(poll) {
+  try {
+    const pollId = poll.id;
+    const response = await fetch(`http://localhost:8080/api/polls/${pollId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(poll)
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to update poll')
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error('Error updating poll', error)
     throw error
   }
 }
