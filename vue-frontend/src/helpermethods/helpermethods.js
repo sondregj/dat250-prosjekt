@@ -277,8 +277,8 @@ export async function checkPollExpired(polls) {
         validUntil: 0
       }
 
-      await updatePoll(expiredPoll) //sets the poll object as expired in the database
       poll.validUntil = 0 //marks the poll as expired locally
+      await updatePoll(expiredPoll) //sets the poll object as expired in the database
       console.log(`Poll with id ${poll.id} is expired`)
     }
   }
