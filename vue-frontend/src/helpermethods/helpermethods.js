@@ -91,11 +91,12 @@ export function loginUser(username, password) {
 export function createNewPoll(question, hoursValid, voteOptions) {
 
   const now = new Date();
+  const token = localStorage.getItem("JWT");
   let validUntil = new Date();
 
   console.log("Hours valid: ", hoursValid)
-  
-  
+
+
   if (!token){
     throw new Error("You need to be authorized to create a poll");
   }

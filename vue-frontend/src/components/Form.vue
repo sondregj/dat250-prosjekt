@@ -24,7 +24,7 @@ const handleGuest = () => {
     createGuestUser()
     router.push("/")
   } catch (error){
-    alert("Error during guest init: " + error);
+    alert("Error during guest init: " + error)
   }
 }
 
