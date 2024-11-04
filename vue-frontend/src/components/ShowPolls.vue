@@ -1,5 +1,5 @@
 <script setup>
-import { addVote, getPolls, deletePoll } from '@/helpermethods/helpermethods.js'
+import { addVote, getPolls, deletePoll, getPoll } from '@/helpermethods/helpermethods.js'
 import { ref } from 'vue'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
@@ -12,24 +12,28 @@ async function handleVote(voteOption) {
     const result = await addVote(voteOption)
 
     if (result) {
-      const pollId = voteOption.pollId
-      const voteId = result.id
-      const poll = polls.value.find(poll => poll.id === pollId)
-      if (poll) {
-        const voption = poll.voteOptions.find(
-          voption => voption.id === voteOption.id,
-        )
-        if (voption) {
-          voption.votes.push({
-            id: voteId,
-            publishedAt: Date.now(),
-            voteOptionId: voption.id,
-            pollQuestion: poll.question,
-            voteOptionCaption: voption.caption,
-            pollId: poll.id,
-          })
-        }
-      }
+      //const pollId = voteOption.pollId
+      //const voteId = result.id
+      //const poll = polls.value.find(poll => poll.id === pollId)
+      //if (poll) {
+      //  const voption = poll.voteOptions.find(
+      //    voption => voption.id === voteOption.id,
+      //  )
+      //  if (voption) {
+      //    voption.votes.push({
+      //      id: voteId,
+      //      publishedAt: Date.now(),
+      //      voteOptionId: voption.id,
+      //      pollQuestion: poll.question,
+      //      voteOptionCaption: voption.caption,
+      //      pollId: poll.id,
+      //    })
+      //  }
+      //}
+      let retrievedPoll = await getPoll(voteOption.pollId);
+      polls.value
+      .find(poll => poll.id === retrievedPoll.id)
+      .voteOptions = retrievedPoll.voteOptions
     }
   } catch (error) {
     console.log(error)

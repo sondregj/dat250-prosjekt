@@ -1,10 +1,9 @@
 package no.hvl.dat250.polls.controllers;
 
-import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -12,7 +11,6 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,10 +18,13 @@ import org.springframework.web.bind.annotation.RestController;
 
 import no.hvl.dat250.polls.Error.OperationFailedError;
 import no.hvl.dat250.polls.Error.ResourceNotFoundException;
+import no.hvl.dat250.polls.Services.GuestUserService;
 import no.hvl.dat250.polls.Services.UserService;
+import no.hvl.dat250.polls.Services.VoteOptionService;
 import no.hvl.dat250.polls.Services.VoteService;
 import no.hvl.dat250.polls.models.User;
 import no.hvl.dat250.polls.models.Vote;
+import no.hvl.dat250.polls.models.guestUser;
 
 /**
  * VoteController
@@ -36,6 +37,8 @@ public class VoteController {
 
     @Autowired VoteService service;
     @Autowired UserService userService;
+    @Autowired VoteOptionService voService;
+    @Autowired GuestUserService guService;
 
     // @GetMapping
     // public ResponseEntity<List<Vote>> getAllVotes(){
@@ -68,14 +71,17 @@ public class VoteController {
             .orElseThrow(() -> new ResourceNotFoundException("Vote not found"));
 
         if (authentication != null){
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            User user = userService.getUserByUsername(userDetails.getUsername())
+            Jwt token = (Jwt) authentication.getPrincipal();
+            String username = token.getClaimAsString("sub");
+            User user = userService.getUserByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
             if (!vote.getUser().equals(user)){
                 return new ResponseEntity<>(HttpStatus.FORBIDDEN);
             }
         } else {
-            if (!vote.getGuestId().equals(guestId)){
+            guestUser guest = guService.getGuestById(guestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Guest user not found"));
+            if (!vote.getGuest().equals(guest)){
                 return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
             }
         }
@@ -91,23 +97,41 @@ public class VoteController {
             @RequestHeader(value = "GuestId", required = false) 
             String guestId,
             Authentication authentication){
-
+        System.out.println("CreatedVote: " + createdVote);
         if (authentication == null && guestId == null){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         if (authentication != null){
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            User user = userService.getUserByUsername(userDetails.getUsername())
+            Jwt token = (Jwt) authentication.getPrincipal();
+            String username = token.getClaimAsString("sub");
+            User user = userService.getUserByUsername(username)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found"));
             createdVote.setUser(user);
+            Optional<Vote> existingVote = service.findUserVoteOnPoll(user, createdVote);
+            if (existingVote.isPresent()){
+                Vote oldVote = existingVote.get();
+                Vote vote = service.updateVote(oldVote.getId(), createdVote)
+                    .orElseThrow(() -> new OperationFailedError("Could not update Vote"));
+                return new ResponseEntity<>(vote, HttpStatus.CREATED);
+            }
         } else {
-            createdVote.setGuestId(guestId);
+            guestUser guest = guService.getGuestById(guestId)
+                .orElseThrow(() -> new ResourceNotFoundException("Guest user not found"));
+            createdVote.setGuest(guest);
+            Optional<Vote> existingVote = service.findGuestVoteOnPoll(guest, createdVote);
+            if (existingVote.isPresent()){
+                Vote oldVote = existingVote.get();
+                Vote vote = service.updateVote(oldVote.getId(), createdVote)
+                    .orElseThrow(() -> new OperationFailedError("Could not update Vote"));
+                return new ResponseEntity<>(vote, HttpStatus.CREATED);
+            }
         }
 
         Vote vote = service.addVote(createdVote);
         return new ResponseEntity<>(vote, HttpStatus.CREATED);
             }
+
 
     // @PutMapping("/{id}")
     // public ResponseEntity<Vote> updateVote(@PathVariable("id") Long id,

@@ -85,6 +85,19 @@ public class PollService {
    @Transactional
    public boolean deletePoll(Poll poll){
        repo.delete(poll);
+       poll.getCreator().getCreatedPolls().remove(poll);
+       uRepo.save(poll.getCreator());
+       return repo.findById(poll.getId()).isEmpty();
+   }
+
+   /**
+    *@param poll the poll that you want to delete
+    *@param user the poll that you want to delete
+    *@return True if the poll was deleted, false if not
+    */
+   @Transactional
+   public boolean deletePoll(User user, Poll poll){
+       repo.delete(poll);
        return repo.findById(poll.getId()).isEmpty();
    }
 

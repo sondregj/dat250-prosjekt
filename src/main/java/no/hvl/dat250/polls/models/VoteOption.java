@@ -108,6 +108,7 @@ public class VoteOption implements Serializable {
             ", caption='" + caption + '\'' +
             ", presentationOrder=" + presentationOrder +
             ", poll=" + (poll != null ? poll.getId() : "null") +
+            ", pollId =" + (getPollId() != null ? getPollId() : "null") +
             '}';
     }
 
