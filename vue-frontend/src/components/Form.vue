@@ -27,19 +27,27 @@ const handleGuest = async () => {
 const handleSubmit = async () => {
   try{
     createNewUser(username.value, password.value, email.value);
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 400));
     loginUser(username.value, password.value);
+    localStorage.removeItem('guest-id')
+    console.log("Removed guest-id")
     resetForm();
     router.push("/");
   } catch(error){
-    console.error("Error during cration or login: ", error.message);
+    console.error("Error during creation or login: ", error.message);
   }
 }
 
 const handleSubmitLogin = async () => {
-  loginUser(username.value, password.value)
-  resetForm()
-  router.push("/")
+  try{
+    loginUser(username.value, password.value)
+    localStorage.removeItem('guest-id')
+    console.log("Removed guest-id")
+    resetForm()
+    router.push("/")
+  } catch(error){
+    console.error("Error during creation or login: ", error.message);
+  }
 }
 </script>
 

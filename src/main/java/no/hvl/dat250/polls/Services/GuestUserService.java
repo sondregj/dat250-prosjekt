@@ -11,6 +11,7 @@ import no.hvl.dat250.polls.models.guestUser;
 
 /**
  * GuestUserService
+ * @author Jonas Vestbø
  */
 @Service
 public class GuestUserService {

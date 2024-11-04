@@ -1,10 +1,7 @@
 package no.hvl.dat250.polls.Services;
 
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
 import no.hvl.dat250.polls.Repository.UserRepository;
 import no.hvl.dat250.polls.models.User;
 import org.springframework.beans.factory.annotation.Autowired;

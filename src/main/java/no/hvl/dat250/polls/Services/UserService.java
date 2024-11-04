@@ -8,7 +8,6 @@ import no.hvl.dat250.polls.dto.UserCreationDTO;
 import no.hvl.dat250.polls.models.Poll;
 import no.hvl.dat250.polls.models.User;
 import no.hvl.dat250.polls.models.Vote;
-import no.hvl.dat250.polls.utils.SignupUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -25,9 +24,6 @@ public class UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Autowired
-    private VoteService service;
 
     /**
      *@return A list containing all Users
