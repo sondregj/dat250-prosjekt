@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -126,24 +127,38 @@ public class PollController {
         return new ResponseEntity<>(poll, HttpStatus.OK);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Poll> updateValidUntil(@PathVariable("id") Long id,
+            @RequestBody Poll updatedPoll){
+            Poll existingPoll = service.getPollById(id)
+               .orElseThrow(() -> new ResourceNotFoundException("Could not find poll"));
+    
+                existingPoll.setValidUntil(updatedPoll.getValidUntil());
+                Poll updated = service.updatePoll(id, existingPoll)
+                    .orElseThrow(() -> new ResourceNotFoundException("Could not find poll"));
+
+                    return new ResponseEntity<>(updated, HttpStatus.OK);
+            }
+
     //Needs to be logged in // Maybe not a needed method at all? //Only for admin?
     // @PutMapping("/{id}")
     // public ResponseEntity<Poll> updatePoll(@PathVariable("id") Long id, 
     //         @RequestBody Poll updatedPoll,
     //         Authentication authentication){
-    //     UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+    //     Jwt token = (Jwt) authentication.getPrincipal();
+    //     String username = token.getClaimAsString("sub");
     //     Poll existingPoll = service.getPollById(id)
     //         .orElseThrow(() -> new ResourceNotFoundException("Poll not found"));
     //
-    //     if (!existingPoll.getCreator().getUsername().equals(userDetails.getUsername())){
+    //     if (!existingPoll.getCreator().getUsername().equals(username)){
     //         throw new AccessDeniedException("You can only modify your own poll");
     //     }
     //     Poll updated = service.updatePoll(id, updatedPoll)
     //         .orElseThrow(() -> new OperationFailedError("Failed to update poll"));
     //
     //     return new ResponseEntity<>(updated, HttpStatus.OK);
-    //       
+    //      
     //
     // }
-    //
+    
 }
