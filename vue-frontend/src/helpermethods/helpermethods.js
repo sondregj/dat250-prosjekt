@@ -52,8 +52,9 @@ export function loginUser(username, password) {
         })
       }
     })
-    .then(data => {
-      console.log('jwt:' + data)
+    .then(token => {
+      localStorage.setItem("JWT", token);
+      console.log('jwt:' + token);
     })
     .catch(error => {
       alert(error.message)
@@ -66,12 +67,19 @@ export function createNewPoll(question, hoursValid, voteOptions) {
   let validUntil = new Date();
 
   console.log("Hours valid: ", hoursValid)
+  
+  
+  if (!token){
+    throw new Error("You need to be authorized to create a poll");
+  }
 
   if(hoursValid > 0) {
      validUntil.setTime(validUntil.getTime() + hoursValid * 60 * 60 * 1000) //adds x amount of hours
   }
 
   console.log('Valid until after', validUntil)
+
+
 
   fetch('http://localhost:8080/api/polls', {
     method: 'POST',
@@ -83,16 +91,18 @@ export function createNewPoll(question, hoursValid, voteOptions) {
     }),
     headers: {
       'Content-Type': 'application/json',
+      "Authorization": `Bearer ${token}`,
     },
   })
     .then(response => {
-      if (response.ok) {
-        question = ''
+      if (response.status === 201) {
+          question = ''
         hoursValid = 0
         voteOptions = []
         console.log('poll created successfully')
       } else {
         return response.json().then(data => {
+          console.log('Poll failed');
           throw new Error(data.message || 'Failed to create poll')
         })
       }
@@ -101,6 +111,28 @@ export function createNewPoll(question, hoursValid, voteOptions) {
       alert(error.message)
     })
 }
+
+export async function getPoll(id) {
+  try {
+    const response = await fetch('http://localhost:8080/api/polls/'+id, {
+      method: 'GET',
+    })
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    //No content
+    if (response.status == 204) {
+      return []
+    }
+
+    return await response.json()
+  } catch (error) {
+    console.error('Failed to fetch polls', error)
+    return []
+  }
+}
+
 
 export async function getPolls() {
   try {
@@ -111,7 +143,6 @@ export async function getPolls() {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
-
     //No content
     if (response.status == 204) {
       return []
@@ -125,10 +156,17 @@ export async function getPolls() {
 }
 
 export async function addVote(voteoption) {
+  const token = localStorage.getItem("JWT");
+  if (!token){
+    throw new Error("You need to be authorized to create a poll");
+  }
   try {
     const response = await fetch('http://localhost:8080/api/votes', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
       body: JSON.stringify({
         publishedAt: Date.now(),
         voteOption: voteoption,
@@ -168,9 +206,17 @@ export async function addVoteGuest(voteoption) {
 }
 
 export async function deletePoll(pollId) {
+  const token = localStorage.getItem("JWT");
+  if (!token){
+    throw new Error("You need to be authorized to create a poll");
+  }
   try {
     const response = await fetch(`http://localhost:8080/api/polls/${pollId}`, {
       method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
     })
 
     if (response.status === 404) {
@@ -180,8 +226,8 @@ export async function deletePoll(pollId) {
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`)
     }
-
     console.log(`Poll with ID ${pollId} deleted successfully`, response)
+    return response.json()
   } catch (error) {
     console.error(`Failed to delete poll with ID ${pollId}`, error)
     throw error
