@@ -40,6 +40,7 @@ async function handleVote(voteOption) {
       //  }
       //}
       let retrievedPoll = await getPoll(voteOption.pollId);
+
       polls.value
       .find(poll => poll.id === retrievedPoll.id)
       .voteOptions = retrievedPoll.voteOptions

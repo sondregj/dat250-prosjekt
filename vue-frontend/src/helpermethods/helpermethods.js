@@ -170,7 +170,7 @@ export async function getPolls() {
 export async function addVote(voteoption) {
   const token = localStorage.getItem("JWT");
   if (!token){
-    throw new Error("You need to be authorized to create a poll");
+    throw new Error("You need to be authorized to vote");
   }
   try {
     const response = await fetch('http://localhost:8080/api/votes', {
@@ -220,7 +220,7 @@ export async function addVoteGuest(voteoption) {
 export async function deletePoll(pollId) {
   const token = localStorage.getItem("JWT");
   if (!token){
-    throw new Error("You need to be authorized to create a poll");
+    throw new Error("You need to be authorized to delete a poll");
   }
   try {
     const response = await fetch(`http://localhost:8080/api/polls/${pollId}`, {
