@@ -6,7 +6,10 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import jakarta.persistence.CascadeType;
@@ -28,7 +31,11 @@ public class Poll implements Serializable {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String question;
+
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private Instant publishedAt;
+
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
     private Instant validUntil;
 
     @ManyToOne
