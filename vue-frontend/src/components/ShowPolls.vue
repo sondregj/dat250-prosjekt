@@ -58,9 +58,14 @@ async function handleVote(voteOption) {
   }
 }
 
+async function refreshPolls() {
+  polls.value = await getPolls()
+}
+
 try {
   polls.value = await getPolls()
   setInterval(() => checkPollExpired(polls.value), 10 * 60 * 1000) //will run every 10 min
+  setInterval(() => refreshPolls(), 10 * 60 * 1000 )
 } catch (e) {
   error.value = e
 }
