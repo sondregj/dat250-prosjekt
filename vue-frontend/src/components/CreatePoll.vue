@@ -20,13 +20,15 @@ const hoursValid = defineModel('hoursValid')
 let voteOptions = ref([])
 let sendVoteOptions = ref([])
 function addVoteOption() {
-  const addedVoteOption = new VoteOption(
-    voteOption.value,
-    sendVoteOptions.value.length + 1,
-  )
-  voteOptions.value = [...voteOptions.value, voteOption.value]
-  sendVoteOptions.value = [...sendVoteOptions.value, addedVoteOption]
-  voteOption.value = ''
+  if (voteOption.value !== "" && voteOption.value !== null) {
+    const addedVoteOption = new VoteOption(
+      voteOption.value,
+      sendVoteOptions.value.length + 1,
+    )
+    voteOptions.value = [...voteOptions.value, voteOption.value]
+    sendVoteOptions.value = [...sendVoteOptions.value, addedVoteOption]
+    voteOption.value = ''
+  }
 }
 
 function deleteLatest() {
