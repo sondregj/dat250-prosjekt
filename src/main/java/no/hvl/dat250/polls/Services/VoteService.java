@@ -1,8 +1,10 @@
 package no.hvl.dat250.polls.Services;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import no.hvl.dat250.polls.models.Poll;
 import no.hvl.dat250.polls.models.User;
 import no.hvl.dat250.polls.models.Vote;
 import no.hvl.dat250.polls.models.VoteOption;
@@ -45,6 +47,15 @@ public class VoteService {
      */
     @Transactional
     public Vote addVote(Vote vote){
+        Optional<VoteOption> vo = vRepo.findById(vote.getVoteOption().getId());
+        if (vo.isEmpty()){
+            return null;
+        }
+        Poll poll = vo.get().getPoll();
+        if (poll.getValidUntil().compareTo(Instant.now()) > 0){
+            return null;
+        }
+
         return repo.save(vote);
     }
 

@@ -5,6 +5,7 @@ import java.util.Optional;
 import no.hvl.dat250.polls.Services.UserService;
 import no.hvl.dat250.polls.dto.UserCreationDTO;
 import no.hvl.dat250.polls.models.User;
+import no.hvl.dat250.polls.Error.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 
 /**
  * UserController
@@ -39,10 +41,10 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable("id") Long id) {
+    public ResponseEntity<?> getUserById(@PathVariable("id") Long id) {
         Optional<User> retrievedUser = service.getUserById(id);
         if (retrievedUser.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(CommonErrors.USER_NOT_FOUND, HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<>(retrievedUser.get(), HttpStatus.OK);
     }
@@ -54,13 +56,19 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<User> deleteUserById(@PathVariable("id") Long id) {
+    public ResponseEntity<?> deleteUserById(@PathVariable("id") Long id) {
         Optional<User> retrievedUser = service.getUserById(id);
         if (retrievedUser.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(
+                    CommonErrors.USER_NOT_FOUND,
+                    HttpStatus.NOT_FOUND
+                    );
         }
         if (!service.deleteUserById(id)) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(
+                    CommonErrors.NOT_DELETED,
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                    );
         }
         return new ResponseEntity<>(retrievedUser.get(), HttpStatus.OK);
     }
@@ -79,13 +87,16 @@ public class UserController {
     // }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(
+    public ResponseEntity<?> updateUser(
         @PathVariable("id") Long id,
         @RequestBody User updUser
     ) {
         Optional<User> updatedUser = service.updateUser(id, updUser);
         if (updatedUser.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(
+                    CommonErrors.USER_NOT_FOUND,
+                    HttpStatus.NOT_FOUND
+                    );
         }
         return new ResponseEntity<>(updatedUser.get(), HttpStatus.OK);
     }

@@ -24,7 +24,6 @@ public class GuestController {
     @PostMapping
     public ResponseEntity<guestUser> registerUserRepository(){
         guestUser newUser = service.registerGuestUser();
-        System.out.println("New user: " + newUser);
         return new ResponseEntity<>(newUser, HttpStatus.CREATED);
     }
 }
