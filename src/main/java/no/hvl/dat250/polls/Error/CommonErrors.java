@@ -18,4 +18,6 @@ public class CommonErrors {
 
     public static final AccessDeniedException NOT_AUTHORIZED
         = new AccessDeniedException("Could not authorize request");
+    public static final ResourceNotFoundException POLL_NOT_FOUND
+        = new ResourceNotFoundException("Could not find poll");
 }

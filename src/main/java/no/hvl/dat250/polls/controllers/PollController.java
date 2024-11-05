@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import no.hvl.dat250.polls.Error.AccessDeniedException;
+import no.hvl.dat250.polls.Error.CommonErrors;
 import no.hvl.dat250.polls.Error.OperationFailedError;
 import no.hvl.dat250.polls.Error.ResourceNotFoundException;
 import no.hvl.dat250.polls.Services.PollService;
@@ -41,10 +42,13 @@ public class PollController {
 
     //Does not need to be logged in
     @GetMapping
-    public ResponseEntity<List<Poll>> getPolls(){
+    public ResponseEntity<?> getPolls(){
         List<Poll> retrievedPolls = service.getAllPolls();
         if (retrievedPolls.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(
+                    CommonErrors.POLL_NOT_FOUND,
+                    HttpStatus.NOT_FOUND
+                    );
         }
         return new ResponseEntity<>(retrievedPolls, HttpStatus.OK);
     }
@@ -63,20 +67,25 @@ public class PollController {
         return new ResponseEntity<>(retrievedPoll.get(), HttpStatus.OK);
     }
 
-    // Needs to be logged in
     @PostMapping
     public ResponseEntity<?> postPoll(@RequestBody Poll poll, Authentication authentication){
         if (authentication == null){
-            return new ResponseEntity<>(new AccessDeniedException("You need to be logged in to post a poll"),
-                                        HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(
+                    CommonErrors.NOT_AUTHORIZED,
+                    HttpStatus.FORBIDDEN
+    // Needs to be logged in
+                    );
         }
         Jwt token = (Jwt) authentication.getPrincipal();
         String username = token.getClaimAsString("sub");
 
         Optional<User> userOPT = UserService.getUserByUsername(username);
         if (userOPT.isEmpty()){
-            return new ResponseEntity<>(new ResourceNotFoundException("Could not find requested user"),
-                                        HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(
+                    CommonErrors.USER_NOT_FOUND,
+                    HttpStatus.NOT_FOUND
+                    );
+                                        
         }
         User user = userOPT.get();
         poll.setCreator(user);
