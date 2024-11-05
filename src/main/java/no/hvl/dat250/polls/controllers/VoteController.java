@@ -143,8 +143,9 @@ public class VoteController {
         } else {
             Optional<guestUser> guestUser = guService.getCheckAndExtendById(guestId);
             if (guestUser.isEmpty()){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                        new ResourceNotFoundException("Guest user not found or expired")
+                return new ResponseEntity<>(
+                        CommonErrors.WRONG_USER,
+                        HttpStatus.NOT_FOUND
                         );
             }
             guestUser guest = guestUser.get();
@@ -160,6 +161,12 @@ public class VoteController {
         }
 
         Vote vote = service.addVote(createdVote);
+        if (vote == null){
+            return new ResponseEntity<>(
+                    CommonErrors.POLL_EXPIRED,
+                    HttpStatus.NOT_FOUND
+                    );
+        }
         return new ResponseEntity<>(vote, HttpStatus.CREATED);
             }
 

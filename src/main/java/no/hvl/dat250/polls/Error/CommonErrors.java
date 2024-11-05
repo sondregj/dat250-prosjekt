@@ -20,4 +20,7 @@ public class CommonErrors {
         = new AccessDeniedException("Could not authorize request");
     public static final ResourceNotFoundException POLL_NOT_FOUND
         = new ResourceNotFoundException("Could not find poll");
+
+    public static final ResourceNotFoundException POLL_EXPIRED
+        = new ResourceNotFoundException("Poll expired");
 }
