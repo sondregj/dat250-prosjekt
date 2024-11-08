@@ -12,27 +12,63 @@ For the tech stack we have chosen to use:
 - Build tool: Gradle
 ## Class Diagram
 ```mermaid
-classDiagram 
-    class User {
-        username: String
-        email: String
-    }    
+classDiagram
+   class User
+   class Vote
+   class Poll
+   class VoteOption
+   class guestUser
+
+   
+
+   User "1" *--> "0..*" Vote : voted
+   User "1" *--> "0..*" Poll : created
+   Poll "1" *--> "2..*" VoteOption 
+   guestUser "1" *--> "0..*" Vote : voted
+   Vote "0..*" o--> "1" VoteOption
+
+
+    class User{
+      id: Long
+      username: String
+      email: String
+      password: String
+      castedVotes: List<Vote>
+      createdPolls: List
+    }
+
     class Poll {
-        question: String
-        publishedAt: Instant
-        validUntil: Instant
+      id: Long
+      question: String
+      publishedAt: Instant
+      validUntil: Instant
+      creator: User
+      voteOptions: List
+      
     }
+    class Vote{
+        id: Long
+        publishedAt: Instant
+        guest: guestUser
+        user: User
+        voteOption: VoteOption
+    }
+
     class VoteOption {
+        id: Long
         caption: String
-        presentationOrder: int
+        presentationorder: int
+        votes: List
+        poll: Poll
     }
-    class Vote {
-        publishedAt: Instant
+
+    class guestUser {
+        guestId: String
+        validUntil: Instant
+        votes: List
+
     }
-    User *--> "0..*" Vote : voted
-    Poll *--> "2..*" VoteOption 
-    Vote *--> "0..*" VoteOption
-    User *--> "1..*" Poll : created
+
 ```
 
 ## User stories
