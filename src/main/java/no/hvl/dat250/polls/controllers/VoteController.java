@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,7 +22,6 @@ import no.hvl.dat250.polls.Services.PollService;
 import no.hvl.dat250.polls.Services.UserService;
 import no.hvl.dat250.polls.Services.VoteOptionService;
 import no.hvl.dat250.polls.Services.VoteService;
-import no.hvl.dat250.polls.models.Poll;
 import no.hvl.dat250.polls.models.User;
 import no.hvl.dat250.polls.models.Vote;
 import no.hvl.dat250.polls.models.guestUser;
@@ -41,7 +39,6 @@ public class VoteController {
     @Autowired VoteOptionService voService;
     @Autowired GuestUserService guService;
     @Autowired PollService pService;
-    @Autowired SimpMessagingTemplate messagingTemplate;
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getVoteById(@PathVariable("id") Long id){
@@ -137,10 +134,6 @@ public class VoteController {
                 return new ResponseEntity<>(CommonErrors.COULD_NOT_VOTE,
                         HttpStatus.CONFLICT);
             }
-            Optional<Poll> retrievedPoll = pService.getPollByVote(vote.get());
-            if (retrievedPoll.isPresent()){
-                messagingTemplate.convertAndSend("/topic/greetings", retrievedPoll.get());
-            }
             return new ResponseEntity<>(vote.get(), HttpStatus.OK);
         }else
         //Handle if guestUser
@@ -157,10 +150,6 @@ public class VoteController {
             if (vote.isEmpty()){
                 return new ResponseEntity<>(CommonErrors.COULD_NOT_VOTE,
                         HttpStatus.CONFLICT);
-            }
-            Optional<Poll> retrievedPoll = pService.getPollByVote(vote.get());
-            if (retrievedPoll.isPresent()){
-                messagingTemplate.convertAndSend("/topic/greetings", retrievedPoll.get());
             }
             return new ResponseEntity<>(vote.get(), HttpStatus.OK);
         }

@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -40,7 +39,6 @@ public class PollController {
 
     @Autowired
     UserService UserService;
-    @Autowired SimpMessagingTemplate messagingTemplate;
 
     //Does not need to be logged in
     @GetMapping
@@ -92,7 +90,6 @@ public class PollController {
         User user = userOPT.get();
         poll.setCreator(user);
         Poll postedPoll = service.addPoll(poll);
-        messagingTemplate.convertAndSend("/topic/new-poll", postedPoll);
         return new ResponseEntity<>(postedPoll, HttpStatus.CREATED);
     }
 
@@ -117,7 +114,6 @@ public class PollController {
             return new ResponseEntity<>(new OperationFailedError("Could not delete poll"), 
                                             HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        messagingTemplate.convertAndSend("/topic/delete-poll", retrievedPoll);
         return new ResponseEntity<>(retrievedPoll.get(), HttpStatus.OK);
     }
 
@@ -146,7 +142,6 @@ public class PollController {
             return new ResponseEntity<>(new OperationFailedError("Could not delete poll"),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        messagingTemplate.convertAndSend("/topic/delete-poll", poll.getId());
         return new ResponseEntity<>(poll, HttpStatus.OK);
     }
 
