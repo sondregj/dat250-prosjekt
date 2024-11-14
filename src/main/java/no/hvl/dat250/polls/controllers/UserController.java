@@ -31,15 +31,6 @@ public class UserController {
     @Autowired
     UserService service;
 
-    @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> allUsers = service.getAllUsers();
-        if (allUsers == null || allUsers.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(allUsers, HttpStatus.OK);
-    }
-
     @GetMapping("/{id}")
     public ResponseEntity<?> getUserById(@PathVariable("id") Long id) {
         Optional<User> retrievedUser = service.getUserById(id);
@@ -106,4 +97,5 @@ public class UserController {
 
     //     return ResponseEntity.ok(user);
     // }
+    //
 }

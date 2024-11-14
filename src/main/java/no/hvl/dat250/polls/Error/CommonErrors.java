@@ -23,4 +23,7 @@ public class CommonErrors {
 
     public static final ResourceNotFoundException POLL_EXPIRED
         = new ResourceNotFoundException("Poll expired");
+
+    public static final ResourceNotFoundException COULD_NOT_VOTE 
+        = new ResourceNotFoundException("Could not create vote");
 }

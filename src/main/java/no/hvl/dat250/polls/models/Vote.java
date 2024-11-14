@@ -29,6 +29,7 @@ public class Vote implements Serializable {
 
     @ManyToOne
     @JoinColumn(name="guest_id", nullable = true)
+    @JsonBackReference(value = "votes-guest")
     private guestUser guest;
 
     @ManyToOne
@@ -126,6 +127,7 @@ public class Vote implements Serializable {
             "id=" + id +
             ", publishedAt=" + publishedAt +
             ", user=" + (user != null ? user.getId() : "null") +
+            ", guestUser=" + (guest != null ? guest.getGuestId() : "null") +
             ", voteOption=" + (voteOption != null ? voteOption.getId() : "null") +
             '}';
     }

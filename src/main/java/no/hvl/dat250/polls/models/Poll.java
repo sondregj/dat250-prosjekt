@@ -95,9 +95,7 @@ public class Poll implements Serializable {
     }
 
     public List<VoteOption> getVoteOptions() {
-        return this.voteOptions.stream()
-            .sorted(java.util.Comparator.comparing(VoteOption::getPresentationOrder))
-            .toList();
+        return this.voteOptions;
     }
     
     @JsonIgnore

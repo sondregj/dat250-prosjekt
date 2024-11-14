@@ -2,19 +2,23 @@
 
 import {
   addVote,
+  addVoteGuest,
   getPolls,
   deletePoll,
   getPoll,
   checkPollExpired,
 } from '@/helpermethods/helpermethods.js'
 
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount} from 'vue'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
+import { createClient } from '@/websocketing/Socket_Client'
+import { Client } from '@stomp/stompjs'
 
 const polls = ref([])
 const error = ref(null)
-
+/**@type{Client} */
+let client;
 async function handleVote(voteOption) {
   try {
 
@@ -27,48 +31,83 @@ async function handleVote(voteOption) {
   } else {
     alert("You have to be logged in as either a guest or a user to vote");
   }
-
     if (result) {
-      //const pollId = voteOption.pollId
-      //const voteId = result.id
-      //const poll = polls.value.find(poll => poll.id === pollId)
-      //if (poll) {
-      //  const voption = poll.voteOptions.find(
-      //    voption => voption.id === voteOption.id,
-      //  )
-      //  if (voption) {
-      //    voption.votes.push({
-      //      id: voteId,
-      //      publishedAt: Date.now(),
-      //      voteOptionId: voption.id,
-      //      pollQuestion: poll.question,
-      //      voteOptionCaption: voption.caption,
-      //      pollId: poll.id,
-      //    })
-      //  }
-      //}
       let retrievedPoll = await getPoll(voteOption.pollId);
-
       polls.value
       .find(poll => poll.id === retrievedPoll.id)
       .voteOptions = retrievedPoll.voteOptions
-    }
-  } catch (error) {
+    } } catch (error) {
     console.log(error)
+  }
+}
+
+function onVoteMessage(message){
+let body;
+
+  if (message.isBinaryBody) {
+    let binaryBody = message.binaryBody;
+    body = new TextDecoder("utf-8").decode(binaryBody);
+  } else {
+    body = message.body;
+  }
+  console.log("Recieved message VOTE: " + body)
+  try{
+  let recievedPoll = JSON.parse(body);
+     let index = polls.value
+      .findIndex(poll => poll.id === recievedPoll.id)
+      polls.value.splice(index, 1, recievedPoll)
+  } catch(error){
+    console.error('Could not parse message');
+  }
+}
+
+function onPollMessage(message){
+let body;
+
+  if (message.isBinaryBody) {
+    // Decode the binary body to a string
+    let binaryBody = message.binaryBody;
+    body = new TextDecoder("utf-8").decode(binaryBody);
+  } else {
+    // If the body is already a string
+    body = message.body;
+  }
+  console.log("Recieved message CREATE: " + body)
+  try{
+  let recievedPoll = JSON.parse(body);
+      polls.value.push(recievedPoll)
+      console.log(polls.value)
+
+  } catch(error){
+    console.error('Could not parse message');
+  }
+}
+
+function onDeleteMessage(message){
+let body;
+
+  if (message.isBinaryBody) {
+    // Decode the binary body to a string
+    let binaryBody = message.binaryBody;
+    body = new TextDecoder("utf-8").decode(binaryBody);
+  } else {
+    // If the body is already a string
+    body = message.body;
+  }
+  console.log("Recieved message DELETE: " + body)
+  try{
+  let pollindex = Number(body);
+      console.log(pollindex)
+      polls.value = polls.value.filter(poll => poll.id !== pollindex)
+      console.log(polls.value)
+  } catch(error){
+    console.error(error);
   }
 }
 
 async function refreshPolls() {
   console.log("Refreshing Polls")
   polls.value = await getPolls()
-}
-
-try {
-  polls.value = await getPolls()
-  setInterval(() => checkPollExpired(polls.value),  10 * 60 * 1000) //will run every 10 min
-  setInterval(() => refreshPolls(),  15 * 60 * 1000 )
-} catch (e) {
-  error.value = e
 }
 
 async function handleDeletePoll(pollId) {
@@ -79,6 +118,19 @@ async function handleDeletePoll(pollId) {
     console.log(error)
   }
 }
+
+onMounted(async () => {
+  try {
+    client = createClient(onVoteMessage,onPollMessage,onDeleteMessage);
+    polls.value = await getPolls()
+    setInterval(() => checkPollExpired(polls.value), 10 * 60 * 1000) // Runs every 10 min
+    setInterval(() => refreshPolls(), 15 * 60 * 1000)
+  } catch (e) {
+    error.value = e
+  }
+})
+
+
 </script>
 
 <template>
@@ -110,8 +162,7 @@ async function handleDeletePoll(pollId) {
             </li>
           </ul>
         </template>
-        <template #footer>
-          <div class="footer">
+        <template #footer> <div class="footer">
             <Button
               label="Delete Poll"
               class="delete"

@@ -26,6 +26,7 @@ public class GuestUserService {
     /**
      *Retrieves the guest user with given id. 
      *If it is still valid it extends the valid time and saves it in the database
+     *If the user is not still valid it returns and emptyOptional
      *@param id The id of the guest user
      *@return The guestUser with given id with extended validUntil or an empty Optioanl
      */

@@ -200,7 +200,7 @@ export async function addVote(voteoption) {
         voteOption: voteoption,
       }),
     })
-    if (!response.ok) {
+    if (!response.status === 201) {
       throw new Error('Http error! Status: ' + response.status)
     }
     return await response.json()
@@ -223,10 +223,12 @@ export async function addVoteGuest(voteoption) {
         voteOption: voteoption,
       }),
     })
-    if (!response.ok) {
+    if (!response.status === 201) {
       throw new Error('Http error! Status: ' + response.status)
     }
-    return await response.json()
+    let data = await response.json()
+    console.log(data)
+    return data
   } catch (error) {
     console.error('Failed to vote', error)
     return null
@@ -304,5 +306,43 @@ export async function updatePoll(poll) {
   } catch (error) {
     console.error('Error updating poll', error)
     throw error
+  }
+}
+
+export async function checkGuest(guestid){
+  try {
+    const response = await fetch(`http://localhost:8080/api/guest/${guestid}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to check guest')
+    }
+    let data = await response.json()
+    console.log(data)
+    return data
+  } catch (error) {
+    console.error('Error checking guest user', error)
+    throw error
+  }
+}
+
+export async function getPollByUser(){
+  let token = localStorage.getItem('JWT');
+  if (!token){
+    throw new Error("Has to be logged in")
+  }
+  let response = await fetch(`http://localhost:8080/api/`, {
+    method: 'GET',
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    }
+  })
+  if (!response.ok){
+
   }
 }

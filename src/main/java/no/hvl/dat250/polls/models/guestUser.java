@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
@@ -24,9 +26,10 @@ public class guestUser {
     private Instant validUntil;
 
     @OneToMany(mappedBy = "guest")
+    @JsonBackReference(value = "votes-guest")
     private List<Vote> votes;
 
-    public guestUser(){
+	public guestUser(){
         this.guestId = generateGuestId();
         this.validUntil = Instant.now().plus(STANDARD_DURATION_HOURS);
     }
@@ -40,6 +43,14 @@ public class guestUser {
      */
     public void extendValidUntil(){
         this.validUntil = Instant.now().plus(STANDARD_DURATION_HOURS);
+    }
+
+    public List<Vote> getVotes() {
+        return votes;
+    }
+
+    public void setVotes(List<Vote> votes) {
+        this.votes = votes;
     }
 
     public void setValidUntil(Instant newValidUntil){

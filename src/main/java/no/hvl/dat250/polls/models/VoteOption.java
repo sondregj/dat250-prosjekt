@@ -3,7 +3,6 @@ package no.hvl.dat250.polls.models;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
@@ -39,7 +38,9 @@ public class VoteOption implements Serializable {
     @JsonBackReference(value = "voteOption-Poll")
     private Poll poll;
 
-    public VoteOption(){}
+    public VoteOption(){
+        this.votes = new ArrayList<>();
+    }
 
     public VoteOption(String caption, int presentationOrder){
         this.caption = caption;
@@ -112,13 +113,12 @@ public class VoteOption implements Serializable {
             '}';
     }
 
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         VoteOption that = (VoteOption) o;
-        return presentationOrder == that.presentationOrder &&
-            Objects.equals(id, that.id) &&
-            Objects.equals(caption, that.caption);
+        return this.getId() == that.getId();
     }
 }

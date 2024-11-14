@@ -50,7 +50,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth ->
                 auth
                     // TODO: Add more specific rules
-                    .requestMatchers("/api/auth/**", "/api/users", "/api/votes/**", "/api/polls/**", "api/guest/**")
+                    .requestMatchers("/api/auth/**", "/api/users", "/api/votes/**", "/api/polls/**", "api/guest/**", "/polls/**")
                     // .anyRequest()
                     // .authenticated()
                     .permitAll()
@@ -62,7 +62,8 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5174"));
+        configuration.setAllowedOrigins(Arrays.asList("http://localhost:5174", "http://localhost:4200",
+                    "http://localhost:3000","http://localhost:8081"));
         configuration.setAllowedMethods(
             Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS")
         );

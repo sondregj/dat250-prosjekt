@@ -37,6 +37,7 @@ public class UserService {
      *@return An optional containing the user with the given id or an empty optional if it does
      * not exist
      */
+    @Transactional
     public Optional<User> getUserById(Long id) {
         return repo.findById(id);
     }

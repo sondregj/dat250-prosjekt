@@ -89,7 +89,7 @@ const handleSubmitLogin = async () => {
         @click="handleSubmitLogin"
       ></Button>
     </div>
-    <div class="button">
+    <div class="guest-button">
       <Button
         :label="props.guestText"
         @click="handleGuest"
@@ -123,6 +123,9 @@ div.form {
 }
 
 div.button {
+  padding-top: 15px;
+}
+div.guest-button {
   padding-top: 15px;
 }
 
