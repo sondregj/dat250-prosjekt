@@ -42,6 +42,9 @@ public class UserController {
 
     @PostMapping
     public ResponseEntity<User> addUser(@RequestBody UserCreationDTO user) {
+        if (user.getEmail().isEmpty() || user.getUsername().isEmpty()||user.getPassword().isEmpty()){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
         User savedUser = service.addUser(user);
         return new ResponseEntity<>(savedUser, HttpStatus.OK);
     }

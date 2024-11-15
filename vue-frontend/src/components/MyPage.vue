@@ -79,6 +79,9 @@ onMounted(async () => {
     <div v-else class="poll" v-for="vote in votes" :key="vote.id">
       <Card class="card">
         <template #title>
+          {{ vote.pollQuestion }}
+        </template>
+        <template #content>
           {{ vote.voteOptionCaption }}
         </template>
         <template #footer> <div class="footer">

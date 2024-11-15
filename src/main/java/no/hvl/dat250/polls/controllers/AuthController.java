@@ -1,7 +1,12 @@
 package no.hvl.dat250.polls.controllers;
 
 import no.hvl.dat250.polls.config.JwtService;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -22,20 +27,25 @@ public class AuthController {
     private AuthenticationManager authenticationManager;
 
     @PostMapping("/api/auth/login")
-    public ResponseEntity<String> login(
-        @RequestBody LoginRequest loginRequest
-    ) {
+    public ResponseEntity<Map<String,String>> login(
+            @RequestBody LoginRequest loginRequest
+            ) {
         Authentication authentication = authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                loginRequest.getUsername(),
-                loginRequest.getPassword()
-            )
-        );
+                new UsernamePasswordAuthenticationToken(
+                    loginRequest.getUsername(),
+                    loginRequest.getPassword()
+                    )
+                );
         SecurityContextHolder.getContext().setAuthentication(authentication);
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String jwt = jwtService.generateToken(userDetails);
-        return ResponseEntity.ok(jwt);
-    }
+        Map<String, String> responseBody = new HashMap<>();
+        responseBody.put("token", jwt);
+
+        return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(responseBody);
+            }
 }
 
 class LoginRequest {

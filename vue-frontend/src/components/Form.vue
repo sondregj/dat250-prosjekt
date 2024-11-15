@@ -6,6 +6,7 @@ import InputText from 'primevue/inputtext'
 import { useRouter } from 'vue-router'
 import { createNewUser, loginUser, createGuestUser } from '../helpermethods/helpermethods.js'
 import { useAuth } from '@/helpermethods/auth.js'
+import { ref } from 'vue'
 
 const username = defineModel('username')
 const password = defineModel('password')
@@ -13,6 +14,7 @@ const email = defineModel('email')
 const props = defineProps(['message', 'signup', 'buttonText', 'guestText'])
 const router = useRouter()
 const { login } = useAuth()
+const error = ref(null)
 
 const resetForm = () => {
   username.value = ''
@@ -32,12 +34,22 @@ const handleGuest = () => {
 
 const handleSubmit = async () => {
   try{
-    createNewUser(username.value, password.value, email.value);
+    const response = await createNewUser(username.value, password.value, email.value);
+    console.log(response)
+    if (response){
+    console.log('response was')
     await new Promise(resolve => setTimeout(resolve, 400));
-    loginUser(username.value, password.value);
+    const logInResponse = await loginUser(username.value, password.value);
+    if (logInResponse){
+    console.log('loginresponse was')
     login()
     resetForm()
     await router.push("/");
+    }
+    } else{
+    resetForm()
+    error.value = "Error creating user, email, password and username cannot be empty";
+    }
   } catch(error){
     console.error("Error during creation or login: ", error.message);
   }
@@ -45,20 +57,27 @@ const handleSubmit = async () => {
 
 const handleSubmitLogin = async () => {
   try{
-    loginUser(username.value, password.value)
-    login()
-    resetForm()
-    await router.push("/")
+    const response = await loginUser(username.value, password.value)
+    console.log(response)
+    if (response){
+      login()
+      resetForm()
+      error.value = null;
+      await router.push("/")
+    }
+      resetForm()
+      error.value = "Wrong username or password";
   } catch(error){
     console.error("Error during creation or login: ", error.message);
+    error.value = "An unexpected error occurred during login.";
   }
 }
 </script>
 
 <template>
   <div class="form">
+    <div v-if="error" class="error-message">{{ error }}</div>
     <h3 class="greeting">{{ props.message }}</h3>
-
     <div class="input1">
       <FloatLabel>
         <InputText id="username" v-model="username" />
@@ -131,5 +150,9 @@ div.guest-button {
 
 h3.greeting {
   padding-bottom: 10px;
+}
+.error-message {
+  color: red;
+  margin-bottom: 10px;
 }
 </style>

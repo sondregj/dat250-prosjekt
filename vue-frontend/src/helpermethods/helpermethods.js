@@ -24,68 +24,61 @@ export function createGuestUser() {
 }
 
 
+export async function createNewUser(username, password, email) {
+  try {
+    const response = await fetch('http://localhost:8080/api/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        username: username,
+        password: password,
+        email: email,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-export function createNewUser(username, password, email) {
-  fetch('http://localhost:8080/api/users', {
-    method: 'POST',
-    body: JSON.stringify({
-      username: username,
-      password: password,
-      email: email,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then(response => {
-      if (response.ok) {
-        username = ''
-        password = ''
-        email = ''
-        console.log('user created successfully')
-      } else {
-        return response.json().then(data => {
-          throw new Error(data.message || 'Failed to create user')
-        })
-      }
-    })
-    .catch(error => {
-      alert(error.message)
-    })
+    if (response.ok) {
+      console.log('User created successfully');
+      const data = await response.json();
+      return data;
+    } else {
+      const data = await response.json();
+      throw new Error(data.message || 'Failed to create user');
+    }
+  } catch (error) {
+    console.error('Error creating user:', error.message);
+    throw error;
+  }
 }
 
-export function loginUser(username, password) {
-  fetch('http://localhost:8080/api/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({
-      username: username,
-      password: password,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-      // TODO: response is returned as text for some reason
-      Accept: 'application/json',
-    },
-  })
-    .then(response => {
-      if (response.ok) {
-        username = ''
-        password = ''
-        console.log('user logged in successfully')
-        return response.text()
-      } else {
-        return response.json().then(data => {
-          throw new Error(data.message || 'Failed to login user')
-        })
-      }
-    })
-    .then(token => {
-      localStorage.setItem("JWT", token);
-      console.log('jwt:' + token);
-    })
-    .catch(error => {
-      alert(error.message)
-    })
+export async function loginUser(username, password) {
+  try {
+    const response = await fetch('http://localhost:8080/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        username: username,
+        password: password,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    });
+    if (response.ok) {
+      console.log('User logged in successfully');
+      const data = await response.json();
+      console.log(data)
+      console.log('JWT:', data.token);
+      return true; // Indicate successful login
+    } else {
+      const data = await response.json();
+      throw new Error(data.message || 'Failed to login user');
+    }
+  } catch (error) {
+    console.error('Error logging in:', error.message);
+    return false; // Indicate login failure
+  }
 }
 
 export function createNewPoll(question, hoursValid, voteOptions) {
