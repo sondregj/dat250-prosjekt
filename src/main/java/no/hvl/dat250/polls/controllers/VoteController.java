@@ -1,5 +1,6 @@
 package no.hvl.dat250.polls.controllers;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -154,6 +155,27 @@ public class VoteController {
             return new ResponseEntity<>(vote.get(), HttpStatus.OK);
         }
             }
+
+
+    @GetMapping
+    public ResponseEntity<?> getVotesByUser(Authentication authentication){
+       if (authentication == null){
+           return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+       } 
+       Jwt token = (Jwt) authentication.getPrincipal();
+       String username = token.getClaimAsString("sub");
+       List<Vote> castedVotes = service.getVotesByUser(username);
+        if (castedVotes.isEmpty()){
+            return new ResponseEntity<>(
+                    CommonErrors.POLL_NOT_FOUND,
+                    HttpStatus.NO_CONTENT
+                    );
+        }
+       return new ResponseEntity<>(castedVotes, HttpStatus.OK);
+    }
+
+
+
 
     private Optional<User> authenticateUser(Authentication authentication){
         Jwt token = (Jwt) authentication.getPrincipal();

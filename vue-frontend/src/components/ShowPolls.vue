@@ -4,7 +4,6 @@ import {
   addVote,
   addVoteGuest,
   getPolls,
-  deletePoll,
   getPoll,
   checkPollExpired,
 } from '@/helpermethods/helpermethods.js'
@@ -43,15 +42,6 @@ async function handleVote(voteOption) {
 async function refreshPolls() {
   console.log("Refreshing Polls")
   polls.value = await getPolls()
-}
-
-async function handleDeletePoll(pollId) {
-  try {
-    await deletePoll(pollId)
-    polls.value = polls.value.filter(poll => poll.id !== pollId)
-  } catch (error) {
-    console.log(error)
-  }
 }
 
 onMounted(async () => {
@@ -97,11 +87,6 @@ onMounted(async () => {
           </ul>
         </template>
         <template #footer> <div class="footer">
-            <Button
-              label="Delete Poll"
-              class="delete"
-              @click="handleDeletePoll(poll.id)"
-            ></Button>
           </div>
         </template>
       </Card>

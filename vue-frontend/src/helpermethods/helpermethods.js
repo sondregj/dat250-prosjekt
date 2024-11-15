@@ -331,18 +331,78 @@ export async function checkGuest(guestid){
 }
 
 export async function getPollByUser(){
+  try {
   let token = localStorage.getItem('JWT');
   if (!token){
     throw new Error("Has to be logged in")
   }
-  let response = await fetch(`http://localhost:8080/api/`, {
+  let response = await fetch(`http://localhost:8080/api/polls/user`, {
     method: 'GET',
     headers: {
       "Content-Type": "application/json",
       "Authorization": `Bearer ${token}`,
     }
   })
-  if (!response.ok){
+  if (response.status === 204){
+    console.log("No polls")
+  } else if(!response.ok){
+    throw new Error("Error fetching polls")
+  }
+    return response.json();
+} catch(err){
+  console.log(err)
+}
+}
 
+export async function getVotesByUser(){
+  try {
+  let token = localStorage.getItem('JWT');
+  if (!token){
+    throw new Error("Has to be logged in")
+  }
+  let response = await fetch(`http://localhost:8080/api/votes`, {
+    method: 'GET',
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    }
+  })
+  if (response.status === 204){
+    console.log("No votes")
+  } else if(!response.ok){
+    throw new Error("Error fetching votes")
+  }
+    return response.json();
+} catch(err){
+  console.log(err)
+}
+}
+
+export async function deleteVote(voteId) {
+  const token = localStorage.getItem("JWT");
+  if (!token){
+    throw new Error("You need to be authorized to delete a vote");
+  }
+  try {
+    const response = await fetch(`http://localhost:8080/api/votes/${voteId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (response.status === 404) {
+      throw new Error(`Vote with ID ${voteId} not found`)
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    console.log(`Vote with ID ${voteId} deleted successfully`, response)
+    return response.json()
+  } catch (error) {
+    console.error(`Failed to delete poll with ID ${voteId}`, error)
+    throw error
   }
 }

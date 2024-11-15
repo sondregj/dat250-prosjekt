@@ -5,12 +5,14 @@ import Password from 'primevue/password'
 import InputText from 'primevue/inputtext'
 import { useRouter } from 'vue-router'
 import { createNewUser, loginUser, createGuestUser } from '../helpermethods/helpermethods.js'
+import { useAuth } from '@/helpermethods/auth.js'
 
 const username = defineModel('username')
 const password = defineModel('password')
 const email = defineModel('email')
 const props = defineProps(['message', 'signup', 'buttonText', 'guestText'])
 const router = useRouter()
+const { login } = useAuth()
 
 const resetForm = () => {
   username.value = ''
@@ -33,9 +35,8 @@ const handleSubmit = async () => {
     createNewUser(username.value, password.value, email.value);
     await new Promise(resolve => setTimeout(resolve, 400));
     loginUser(username.value, password.value);
-    localStorage.removeItem('guest-id')
-    console.log("Removed guest-id")
-    resetForm();
+    login()
+    resetForm()
     await router.push("/");
   } catch(error){
     console.error("Error during creation or login: ", error.message);
@@ -45,8 +46,7 @@ const handleSubmit = async () => {
 const handleSubmitLogin = async () => {
   try{
     loginUser(username.value, password.value)
-    localStorage.removeItem('guest-id')
-    console.log("Removed guest-id")
+    login()
     resetForm()
     await router.push("/")
   } catch(error){

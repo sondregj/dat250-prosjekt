@@ -1,5 +1,6 @@
 package no.hvl.dat250.polls.Services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -92,27 +93,36 @@ public class PollService {
    @Transactional
    public boolean deletePoll(Poll poll){
        try {
-           // Step 1: Remove the Poll from the User's list first
            poll.getCreator().getCreatedPolls().remove(poll);
            System.out.println("Poll creator cleaned");
 
-           // Step 2: Save the User to update the relationship
            uRepo.save(poll.getCreator());
            System.out.println("Saved creator");
            manager.flush();
            manager.clear();
 
-           // Step 3: Delete the Poll
            repo.delete(poll);
            System.out.println("repo delete ran");
 
-           // Step 4: Confirm Deletion
            return repo.findById(poll.getId()).isEmpty();
        } catch (Exception e) {
-           // Log the exception for debugging
            e.printStackTrace();
            return false;
        }
+   }
+
+   /**
+    *@param username the username for the user whos polls you want to retrieve
+    *@return all the polls created by the given user
+    */
+   @Transactional
+   public List<Poll> getPollsByUserName(String username){
+        Optional<User> retrievedUser = uRepo.findByUsername(username);
+        if (retrievedUser.isEmpty()){
+            return new ArrayList<>();
+        }
+        List<Poll> retrievedPolls = repo.findPollsByCreator(retrievedUser.get());
+        return retrievedPolls;
    }
 
    @Transactional

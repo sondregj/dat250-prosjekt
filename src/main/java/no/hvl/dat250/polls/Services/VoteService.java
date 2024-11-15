@@ -1,5 +1,6 @@
 package no.hvl.dat250.polls.Services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -129,6 +130,16 @@ public class VoteService {
         vote.setGuest(guest);
         Vote createdVote  = addVote(vote);
         return Optional.of(createdVote);
+    }
+
+    @Transactional
+    public List<Vote> getVotesByUser(String username){
+        Optional<User> retrievedUser = uRepo.findByUsername(username);
+        if (retrievedUser.isEmpty()){
+            return new ArrayList<>();
+        }
+        List<Vote> retrievedVotes = repo.findVotesByCaster(retrievedUser.get());
+        return retrievedVotes;
     }
     
     /**

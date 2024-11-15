@@ -67,6 +67,23 @@ public class PollController {
         return new ResponseEntity<>(retrievedPoll.get(), HttpStatus.OK);
     }
 
+    @GetMapping("/user")
+    public ResponseEntity<?> getPollsByUser(Authentication authentication){
+        if (authentication == null){
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        Jwt token = (Jwt) authentication.getPrincipal();
+        String username = token.getClaimAsString("sub");
+        List<Poll> retrievedPolls = service.getPollsByUserName(username);
+        if (retrievedPolls.isEmpty()){
+            return new ResponseEntity<>(
+                    CommonErrors.POLL_NOT_FOUND,
+                    HttpStatus.NO_CONTENT
+                    );
+        }
+        return new ResponseEntity<>(retrievedPolls, HttpStatus.OK);
+    }
+
     @PostMapping
     public ResponseEntity<?> postPoll(@RequestBody Poll poll, Authentication authentication){
         if (authentication == null){
