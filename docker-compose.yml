@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   polls:
     image: polls:0.0.1-SNAPSHOT
@@ -6,10 +8,34 @@ services:
       - "8080:8080"
     depends_on:
       - postgres
+      - rabbitmq
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/mydb
       SPRING_DATASOURCE_USERNAME: myuser
       SPRING_DATASOURCE_PASSWORD: mypassword
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+
+  messagebroker:
+    image: messagebroker:0.0.1-SNAPSHOT
+    build: .
+    ports:
+      - "8081:8081"
+    depends_on:
+      - rabbitmq
+      - mongodb
+    environment:
+      SPRING_APPLICATION_NAME: messagebroker
+      SPRING_RABBITMQ_HOST: rabbitmq
+      SPRING_RABBITMQ_PORT: 5672
+      SPRING_RABBITMQ_USERNAME: guest
+      SPRING_RABBITMQ_PASSWORD: guest
+      SPRING_DATA_MONGODB_HOST: mongodb
+      SPRING_DATA_MONGODB_PORT: 27017
+      SPRING_DATA_MONGODB_URI: mongodb://mongodb:27017/votingapp
+      SERVER_PORT: 8081
 
   postgres:
     image: postgres:latest
@@ -22,5 +48,22 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
 
+  rabbitmq:
+    image: rabbitmq:management
+    ports:
+      - "5672:5672"
+      - "15672:15672" # Management UI
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+
+  mongodb:
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: votingapp
+
 volumes:
   postgres-data:
+

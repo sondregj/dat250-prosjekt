@@ -16,13 +16,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import no.hvl.dat250.polls.Error.CommonErrors;
 import no.hvl.dat250.polls.Services.GuestUserService;
 import no.hvl.dat250.polls.Services.PollService;
 import no.hvl.dat250.polls.Services.UserService;
 import no.hvl.dat250.polls.Services.VoteOptionService;
 import no.hvl.dat250.polls.Services.VoteService;
+import no.hvl.dat250.polls.messagingrabbitmq.PollProducer;
+import no.hvl.dat250.polls.models.Poll;
 import no.hvl.dat250.polls.models.User;
 import no.hvl.dat250.polls.models.Vote;
 import no.hvl.dat250.polls.models.guestUser;
@@ -40,6 +41,9 @@ public class VoteController {
     @Autowired VoteOptionService voService;
     @Autowired GuestUserService guService;
     @Autowired PollService pService;
+    @Autowired PollProducer producer;
+        
+
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getVoteById(@PathVariable("id") Long id){
@@ -59,13 +63,13 @@ public class VoteController {
             Authentication authentication){
         if (authentication == null && guestId == null){
             return new ResponseEntity<>(CommonErrors.NOT_AUTHORIZED, 
-                                            HttpStatus.BAD_REQUEST);
+                    HttpStatus.BAD_REQUEST);
         }
 
         Optional<Vote> voteOPT = service.getVoteById(id);
         if (voteOPT.isEmpty()){
             return new ResponseEntity<>(CommonErrors.VOTE_NOT_FOUND,
-                                        HttpStatus.NOT_FOUND);
+                    HttpStatus.NOT_FOUND);
         }
 
         Vote vote = voteOPT.get();
@@ -76,7 +80,7 @@ public class VoteController {
             Optional<User> userOPT = userService.getUserByUsername(username);
             if (userOPT.isEmpty()){
                 return new ResponseEntity<>(CommonErrors.USER_NOT_FOUND,
-                                            HttpStatus.NOT_FOUND);
+                        HttpStatus.NOT_FOUND);
             }
             User user = userOPT.get();
             if (!vote.getUser().equals(user)){
@@ -101,13 +105,19 @@ public class VoteController {
             }
         }
 
-       if (!service.deleteVoteById(id)){
+        Optional<Poll> retrievedPoll = pService.getPollByVote(vote);
+        if (!service.deleteVoteById(id)){
             return new ResponseEntity<>(
                     CommonErrors.NOT_DELETED,
                     HttpStatus.INTERNAL_SERVER_ERROR
                     );
-       }
-       return new ResponseEntity<>(vote,HttpStatus.OK);
+        }
+        if (retrievedPoll.isEmpty()){
+            return new ResponseEntity<>(CommonErrors.POLL_NOT_FOUND,
+                    HttpStatus.CONFLICT);
+        }
+        producer.send(retrievedPoll.get());
+        return new ResponseEntity<>(vote,HttpStatus.OK);
     }
 
     @PostMapping
@@ -135,9 +145,19 @@ public class VoteController {
                 return new ResponseEntity<>(CommonErrors.COULD_NOT_VOTE,
                         HttpStatus.CONFLICT);
             }
+            System.out.println("Før henting av poll");
+            Optional<Poll> retrievedPoll = pService.getPollByVote(vote.get());
+            System.out.println("Etter henting av poll");
+            if (retrievedPoll.isEmpty()){
+                return new ResponseEntity<>(CommonErrors.POLL_NOT_FOUND,
+                        HttpStatus.CONFLICT);
+            }
+            System.out.println("Før sending av poll");
+            producer.send(retrievedPoll.get());
+            System.out.println("Etter sending av poll");
             return new ResponseEntity<>(vote.get(), HttpStatus.OK);
         }else
-        //Handle if guestUser
+            //Handle if guestUser
         {
             //authenticate guestuser
             Optional<guestUser> guestOPT = guService.getGuestById(guestId);
@@ -152,7 +172,18 @@ public class VoteController {
                 return new ResponseEntity<>(CommonErrors.COULD_NOT_VOTE,
                         HttpStatus.CONFLICT);
             }
+            System.out.println("Før henting av poll");
+            Optional<Poll> retrievedPoll = pService.getPollByVote(vote.get());
+            System.out.println("Etter henting av poll");
+            if (retrievedPoll.isEmpty()){
+                return new ResponseEntity<>(CommonErrors.POLL_NOT_FOUND,
+                        HttpStatus.CONFLICT);
+            }
+            System.out.println("Før sending av poll");
+            producer.send(retrievedPoll.get());
+            System.out.println("Etter sending av poll");
             return new ResponseEntity<>(vote.get(), HttpStatus.OK);
+
         }
             }
 
