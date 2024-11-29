@@ -24,68 +24,61 @@ export function createGuestUser() {
 }
 
 
+export async function createNewUser(username, password, email) {
+  try {
+    const response = await fetch('http://localhost:8080/api/users', {
+      method: 'POST',
+      body: JSON.stringify({
+        username: username,
+        password: password,
+        email: email,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
 
-export function createNewUser(username, password, email) {
-  fetch('http://localhost:8080/api/users', {
-    method: 'POST',
-    body: JSON.stringify({
-      username: username,
-      password: password,
-      email: email,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-    },
-  })
-    .then(response => {
-      if (response.ok) {
-        username = ''
-        password = ''
-        email = ''
-        console.log('user created successfully')
-      } else {
-        return response.json().then(data => {
-          throw new Error(data.message || 'Failed to create user')
-        })
-      }
-    })
-    .catch(error => {
-      alert(error.message)
-    })
+    if (response.ok) {
+      console.log('User created successfully');
+      const data = await response.json();
+      return data;
+    } else {
+      const data = await response.json();
+      throw new Error(data.message || 'Failed to create user');
+    }
+  } catch (error) {
+    console.error('Error creating user:', error.message);
+    throw error;
+  }
 }
 
-export function loginUser(username, password) {
-  fetch('http://localhost:8080/api/auth/login', {
-    method: 'POST',
-    body: JSON.stringify({
-      username: username,
-      password: password,
-    }),
-    headers: {
-      'Content-Type': 'application/json',
-      // TODO: response is returned as text for some reason
-      Accept: 'application/json',
-    },
-  })
-    .then(response => {
-      if (response.ok) {
-        username = ''
-        password = ''
-        console.log('user logged in successfully')
-        return response.text()
-      } else {
-        return response.json().then(data => {
-          throw new Error(data.message || 'Failed to login user')
-        })
-      }
-    })
-    .then(token => {
-      localStorage.setItem("JWT", token);
-      console.log('jwt:' + token);
-    })
-    .catch(error => {
-      alert(error.message)
-    })
+export async function loginUser(username, password) {
+  try {
+    const response = await fetch('http://localhost:8080/api/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({
+        username: username,
+        password: password,
+      }),
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json',
+      },
+    });
+    if (response.ok) {
+      console.log('User logged in successfully');
+      const data = await response.json();
+      console.log(data)
+      console.log('JWT:', data.token);
+      return true; // Indicate successful login
+    } else {
+      const data = await response.json();
+      throw new Error(data.message || 'Failed to login user');
+    }
+  } catch (error) {
+    console.error('Error logging in:', error.message);
+    return false; // Indicate login failure
+  }
 }
 
 export function createNewPoll(question, hoursValid, voteOptions) {
@@ -200,7 +193,7 @@ export async function addVote(voteoption) {
         voteOption: voteoption,
       }),
     })
-    if (!response.ok) {
+    if (!response.status === 201) {
       throw new Error('Http error! Status: ' + response.status)
     }
     return await response.json()
@@ -223,10 +216,12 @@ export async function addVoteGuest(voteoption) {
         voteOption: voteoption,
       }),
     })
-    if (!response.ok) {
+    if (!response.status === 201) {
       throw new Error('Http error! Status: ' + response.status)
     }
-    return await response.json()
+    let data = await response.json()
+    console.log(data)
+    return data
   } catch (error) {
     console.error('Failed to vote', error)
     return null
@@ -303,6 +298,104 @@ export async function updatePoll(poll) {
     return await response.json()
   } catch (error) {
     console.error('Error updating poll', error)
+    throw error
+  }
+}
+
+export async function checkGuest(guestid){
+  try {
+    const response = await fetch(`http://localhost:8080/api/guest/${guestid}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to check guest')
+    }
+    let data = await response.json()
+    console.log(data)
+    return data
+  } catch (error) {
+    console.error('Error checking guest user', error)
+    throw error
+  }
+}
+
+export async function getPollByUser(){
+  try {
+  let token = localStorage.getItem('JWT');
+  if (!token){
+    throw new Error("Has to be logged in")
+  }
+  let response = await fetch(`http://localhost:8080/api/polls/user`, {
+    method: 'GET',
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    }
+  })
+  if (response.status === 204){
+    console.log("No polls")
+  } else if(!response.ok){
+    throw new Error("Error fetching polls")
+  }
+    return response.json();
+} catch(err){
+  console.log(err)
+}
+}
+
+export async function getVotesByUser(){
+  try {
+  let token = localStorage.getItem('JWT');
+  if (!token){
+    throw new Error("Has to be logged in")
+  }
+  let response = await fetch(`http://localhost:8080/api/votes`, {
+    method: 'GET',
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`,
+    }
+  })
+  if (response.status === 204){
+    console.log("No votes")
+  } else if(!response.ok){
+    throw new Error("Error fetching votes")
+  }
+    return response.json();
+} catch(err){
+  console.log(err)
+}
+}
+
+export async function deleteVote(voteId) {
+  const token = localStorage.getItem("JWT");
+  if (!token){
+    throw new Error("You need to be authorized to delete a vote");
+  }
+  try {
+    const response = await fetch(`http://localhost:8080/api/votes/${voteId}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (response.status === 404) {
+      throw new Error(`Vote with ID ${voteId} not found`)
+    }
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`)
+    }
+    console.log(`Vote with ID ${voteId} deleted successfully`, response)
+    return response.json()
+  } catch (error) {
+    console.error(`Failed to delete poll with ID ${voteId}`, error)
     throw error
   }
 }

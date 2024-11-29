@@ -22,5 +22,8 @@ export default defineConfig({
     rollupOptions: {
       external: ['primevue/Tag'],
     }
+  },
+  define: {
+    global: 'window',
   }
 })

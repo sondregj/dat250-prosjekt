@@ -2,19 +2,21 @@
 
 import {
   addVote,
+  addVoteGuest,
   getPolls,
-  deletePoll,
   getPoll,
   checkPollExpired,
 } from '@/helpermethods/helpermethods.js'
 
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount} from 'vue'
 import Button from 'primevue/button'
 import Card from 'primevue/card'
+import { Client } from '@stomp/stompjs'
 
 const polls = ref([])
 const error = ref(null)
-
+/**@type{Client} */
+let client;
 async function handleVote(voteOption) {
   try {
 
@@ -27,33 +29,12 @@ async function handleVote(voteOption) {
   } else {
     alert("You have to be logged in as either a guest or a user to vote");
   }
-
     if (result) {
-      //const pollId = voteOption.pollId
-      //const voteId = result.id
-      //const poll = polls.value.find(poll => poll.id === pollId)
-      //if (poll) {
-      //  const voption = poll.voteOptions.find(
-      //    voption => voption.id === voteOption.id,
-      //  )
-      //  if (voption) {
-      //    voption.votes.push({
-      //      id: voteId,
-      //      publishedAt: Date.now(),
-      //      voteOptionId: voption.id,
-      //      pollQuestion: poll.question,
-      //      voteOptionCaption: voption.caption,
-      //      pollId: poll.id,
-      //    })
-      //  }
-      //}
       let retrievedPoll = await getPoll(voteOption.pollId);
-
       polls.value
       .find(poll => poll.id === retrievedPoll.id)
       .voteOptions = retrievedPoll.voteOptions
-    }
-  } catch (error) {
+    } } catch (error) {
     console.log(error)
   }
 }
@@ -63,22 +44,17 @@ async function refreshPolls() {
   polls.value = await getPolls()
 }
 
-try {
-  polls.value = await getPolls()
-  setInterval(() => checkPollExpired(polls.value),  10 * 60 * 1000) //will run every 10 min
-  setInterval(() => refreshPolls(),  15 * 60 * 1000 )
-} catch (e) {
-  error.value = e
-}
-
-async function handleDeletePoll(pollId) {
+onMounted(async () => {
   try {
-    await deletePoll(pollId)
-    polls.value = polls.value.filter(poll => poll.id !== pollId)
-  } catch (error) {
-    console.log(error)
+    polls.value = await getPolls()
+    setInterval(() => checkPollExpired(polls.value), 10 * 60 * 1000) // Runs every 10 min
+    setInterval(() => refreshPolls(), 15 * 60 * 1000)
+  } catch (e) {
+    error.value = e
   }
-}
+})
+
+
 </script>
 
 <template>
@@ -110,13 +86,7 @@ async function handleDeletePoll(pollId) {
             </li>
           </ul>
         </template>
-        <template #footer>
-          <div class="footer">
-            <Button
-              label="Delete Poll"
-              class="delete"
-              @click="handleDeletePoll(poll.id)"
-            ></Button>
+        <template #footer> <div class="footer">
           </div>
         </template>
       </Card>

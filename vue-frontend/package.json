@@ -12,7 +12,11 @@
   },
   "dependencies": {
     "@primevue/themes": "^4.1.0",
+    "@stomp/stompjs": "^7.0.0",
+    "global": "^4.4.0",
     "primevue": "^4.1.0",
+    "puppeteer": "^23.7.1",
+    "sockjs-client": "^1.6.1",
     "vue": "^3.5.12",
     "vue-router": "^4.4.5"
   },

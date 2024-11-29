@@ -1,5 +1,6 @@
 package no.hvl.dat250.polls.Services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -108,22 +109,102 @@ public class VoteService {
         System.out.println("OldVote: " + oldVote.toString());
         return Optional.of(repo.save(oldVote));
     }
-
-    public Optional<Vote> findUserVoteOnPoll(User user, Vote vote){
-        VoteOption retrievdVO = vRepo.getReferenceById(vote.getVoteOption().getId());
-        return retrievdVO.getPoll().getVoteOptions().stream()
-            .flatMap(vo -> vo.getVotes().stream())
-            .filter(v -> v.getUser().equals(user))
-            .findAny();
+    /**
+     *Votes on a voteoption, if the guest user casting the vote already has
+     *a vote on the poll being voted on, the vote will be updated
+     *@param guest the guestUser that is performing the vote
+     *@param vote the Vote that the user want to add
+     *@return The created Vote or an empty Optional if something fails
+     */ 
+    @Transactional
+    public Optional<Vote> handleGuestVote(guestUser guest, Vote vote){
+        Optional<Vote> existingVote = findGuestVoteOnPoll(guest, vote);
+        //Check if there exists a vote on the poll
+        if (existingVote.isPresent()){
+            //Update the vote
+            System.out.println("Found existing vote");
+            return updateVote(existingVote.get().getId(), vote);
+        }
+        //Create a new vote
+        System.out.println("Found vote");
+        vote.setGuest(guest);
+        Vote createdVote  = addVote(vote);
+        return Optional.of(createdVote);
     }
 
-    public Optional<Vote> findGuestVoteOnPoll(guestUser guest, Vote vote){
-        VoteOption retrievdVO = vRepo.getReferenceById(vote.getVoteOption().getId());
-        return retrievdVO.getPoll().getVoteOptions().stream()
-            .flatMap(vo -> vo.getVotes().stream())
-            .filter(v -> v.getGuest().equals(guest))
-            .findAny();
+    @Transactional
+    public List<Vote> getVotesByUser(String username){
+        Optional<User> retrievedUser = uRepo.findByUsername(username);
+        if (retrievedUser.isEmpty()){
+            return new ArrayList<>();
+        }
+        List<Vote> retrievedVotes = repo.findVotesByCaster(retrievedUser.get());
+        return retrievedVotes;
     }
+    
+    /**
+     *Votes on a voteoption, if the user casting the vote already has
+     *a vote on the poll being voted on, the vote will be updated
+     *@param user the User that is performing the vote
+     *@param vote the Vote that the user want to add
+     *@return The created Vote or an empty Optional if something fails
+     */ 
+    @Transactional
+    public Optional<Vote> handleUserVote(User user, Vote vote){
+        //Check if there exists a vote on the poll
+        Optional<Vote> existingVote = findUserVoteOnPoll(user, vote);
+        if (existingVote.isPresent()){
+            //Update the vote
+            System.out.println("Found existing vote");
+            return updateVote(existingVote.get().getId(), vote);
+        }
+        System.out.println("Did not find existing vote"); 
+        //Create a new vote
+        vote.setUser(user);
+        Vote createdVote  = addVote(vote);
+        return Optional.of(createdVote);
+    }
+
+    /**Checks if a user has an existing vote on a poll that is found via a vote
+     *@param user the user we want to find vote for
+     *@param vote the vote that the user wants to cast
+     *@return An existing vote if the user already had a vote on the poll, an empty optional if not
+     */
+        public Optional<Vote> findUserVoteOnPoll(User user, Vote vote) {
+            // Ensure vote and voteOption are not null
+            if (vote == null || vote.getVoteOption() == null) {
+                System.out.println("Vote or voteoption is null");
+                return Optional.empty();
+            }
+
+            // Retrieve the poll ID directly
+            Long pollId = repo.getPollIdByVoteOptionId(vote.getVoteOption().getId());
+            System.out.println(pollId);
+
+            Optional<Vote> retrievedVote = repo.findByUserAndPollId(user.getId(), pollId);
+            System.out.println(retrievedVote);
+            return retrievedVote;
+        }
+
+
+    /**Checks if a guestuser has an existing vote on a poll that is found via a vote
+     *@param guest the guestuser we want to find vote for
+     *@param vote the vote that the user wants to cast
+     *@return An existing vote if the user already had a vote on the poll, an empty optional if not
+     */
+        public Optional<Vote> findGuestVoteOnPoll(guestUser guest, Vote vote) {
+            if (vote == null || vote.getVoteOption() == null) {
+                System.out.println("Vote or option is null");
+                return Optional.empty();
+            }
+
+            // Retrieve the Poll ID from the VoteOption
+            Long pollId = repo.getPollIdByVoteOptionId(vote.getVoteOption().getId());
+
+            // Use the repository method to find the vote
+            return repo.findGuestVoteOnPoll(guest, pollId);
+        }
+
 
 }
     

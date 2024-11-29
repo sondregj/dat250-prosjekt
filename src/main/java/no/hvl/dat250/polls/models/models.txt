@@ -1,0 +1,622 @@
+package no.hvl.dat250.polls.models;
+
+import java.io.Serializable;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+
+/**
+ * Poll
+ */
+@Entity
+public class Poll implements Serializable {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private String question;
+
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+    private Instant publishedAt;
+
+    @JsonFormat(shape = JsonFormat.Shape.NUMBER)
+    private Instant validUntil;
+
+    @ManyToOne
+    private User creator;
+
+    @OneToMany(mappedBy = "poll", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference(value = "voteOption-Poll")
+    private List<VoteOption> voteOptions; 
+
+    public Poll(){}
+
+    public Poll(String question, Instant publishedAt, Instant validUntil){
+        this.question = question;
+        this.publishedAt = publishedAt.truncatedTo(ChronoUnit.SECONDS);
+        this.validUntil = validUntil.truncatedTo(ChronoUnit.SECONDS);
+        this.voteOptions = new ArrayList<>();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getQuestion() {
+        return question;
+    }
+
+    public void setQuestion(String question) {
+        this.question = question;
+    }
+
+    public Instant getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(Instant publishedAt) {
+        this.publishedAt = publishedAt;
+    }
+
+    public Instant getValidUntil() {
+        return validUntil;
+    }
+
+    public void setValidUntil(Instant validUntil) {
+        this.validUntil = validUntil;
+    }
+
+    public User getCreator() {
+        return creator;
+    }
+
+    public void setCreator(User creator) {
+        this.creator = creator;
+    }
+
+    public List<VoteOption> getVoteOptions() {
+        return this.voteOptions;
+    }
+    
+    @JsonIgnore
+    public List<VoteOption> getVoteOptionMutable(){
+        return this.voteOptions;
+    }
+
+    public void setVoteOptions(List<VoteOption> voteOptions) {
+        this.voteOptions = voteOptions;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Poll poll = (Poll) o;
+
+        // Compare id as the unique identifier
+        if (id != null ? !id.equals(poll.id) : poll.id != null) return false;
+        // Optionally compare other important fields like question, publishedAt, and validUntil
+        if (question != null ? !question.equals(poll.question) : poll.question != null) return false;
+        if (publishedAt != null ? !publishedAt.equals(poll.publishedAt) : poll.publishedAt != null) return false;
+        return validUntil != null ? validUntil.equals(poll.validUntil) : poll.validUntil == null;
+    }
+
+    @Override
+    public String toString(){
+        return "Id: " + this.id + " Question: " + this.question + " Creator: " + this.creator.getId() +
+        " VoteOptions: " + this.voteOptions + " Lagd: " + this.publishedAt + " Gyldig til: "
+        + this.validUntil;
+    }
+}
+package no.hvl.dat250.polls.models;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+
+/**
+ * User
+ */
+
+
+@Entity
+@Table(name = "\"user\"") // Escapes the table name "user"
+public class User implements Serializable {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    @Column(unique = true)
+    private String username;
+    private String email;
+    private String password;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference(value = "votes-User")
+    private List<Vote> castedVotes;
+
+    @OneToMany(mappedBy = "creator", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    private List<Poll> createdPolls;
+
+    public User(){
+        castedVotes = new ArrayList<>();
+        createdPolls = new ArrayList<>();
+    }
+
+    public User(String username, String email, String password) {
+        this.username = username;
+        this.email = email;
+        this.password = password;
+        castedVotes = new ArrayList<>();
+        createdPolls = new ArrayList<>();
+
+    }
+
+    public User(String username, String email) {
+        this.username = username;
+        this.email = email;
+        castedVotes = new ArrayList<>();
+        createdPolls = new ArrayList<>();
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public List<Vote> getCastedVotes() {
+        return castedVotes;
+    }
+
+    public void setCastedVotes(List<Vote> castedVotes) {
+        this.castedVotes = castedVotes;
+    }
+
+    @JsonIgnore
+    public List<Poll> getCreatedPolls() {
+        return createdPolls;
+    }
+
+    public void setCreatedPolls(List<Poll> createdPolls) {
+        this.createdPolls = createdPolls;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        if (id != null ? !id.equals(user.id) : user.id != null) return false;
+        if (username != null ? !username.equals(user.username) : user.username != null) return false;
+        if (email != null ? !email.equals(user.email) : user.email != null) return false;
+        return password != null ? password.equals(user.password) : user.password == null;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, email, password, castedVotes, createdPolls);
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", email='" + email + '\'' +
+                ", password='" + password + '\'' +
+                ", castedVotes=" + castedVotes +
+                ", createdPolls=" + createdPolls +
+                '}';
+    }
+}
+
+package no.hvl.dat250.polls.models;
+
+import java.io.Serializable;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
+import java.util.Objects;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
+/**
+ * Vote
+ */
+@Entity
+public class Vote implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+    private Instant publishedAt;
+
+    @ManyToOne
+    @JoinColumn(name="guest_id", nullable = true)
+    @JsonBackReference(value = "votes-guest")
+    private guestUser guest;
+
+    @ManyToOne
+    @JoinColumn(name="user_id", nullable = true)
+    @JsonBackReference(value = "votes-User")
+    private User user;
+
+    @ManyToOne
+    @JoinColumn(name = "vote_option_id")
+    @JsonBackReference(value = "votes-voteOption")
+    private VoteOption voteOption;
+
+    public Vote(Instant publishedAt){
+        this.publishedAt = publishedAt.atZone(ZoneOffset.UTC).toInstant().truncatedTo(ChronoUnit.SECONDS);
+    }
+
+
+    public Vote() {}
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Instant getPublishedAt() {
+        return publishedAt;
+    }
+
+    public void setPublishedAt(Instant publishedAt) {
+        this.publishedAt = publishedAt.truncatedTo(ChronoUnit.SECONDS);
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public VoteOption getVoteOption() {
+        return voteOption;
+    }
+
+    public void setVoteOption(VoteOption voteOption) {
+        this.voteOption = voteOption;
+    }
+
+    public guestUser getGuest() {
+        return guest;
+    }
+
+    public void setGuest(guestUser guest) {
+        this.guest = guest;
+    }
+
+    @JsonProperty("pollId")
+    public Long getPollId() {
+        return voteOption != null && voteOption.getPoll() != null ? voteOption.getPoll().getId() : null;
+    }
+
+    @JsonProperty("pollQuestion")
+    public String getPollQuestion() {
+        return voteOption != null && voteOption.getPoll() != null ? voteOption.getPoll().getQuestion() : null;
+    }
+
+    @JsonProperty("voteOptionId")
+    public Long getVoteOptionId() {
+        return voteOption != null ? voteOption.getId() : null;
+    }
+
+    @JsonProperty("voteOptionCaption")
+    public String getVoteOptionCaption() {
+        return voteOption != null ? voteOption.getCaption() : null;
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Vote vote = (Vote) o;
+        return Objects.equals(id, vote.id) &&
+               Objects.equals(publishedAt, vote.publishedAt) &&
+               Objects.equals(user, vote.user) &&
+               Objects.equals(voteOption, vote.voteOption);
+    }
+
+    @Override
+    public String toString() {
+        return "Vote{" +
+            "id=" + id +
+            ", publishedAt=" + publishedAt +
+            ", user=" + (user != null ? user.getId() : "null") +
+            ", guestUser=" + (guest != null ? guest.getGuestId() : "null") +
+            ", voteOption=" + (voteOption != null ? voteOption.getId() : "null") +
+            '}';
+    }
+}
+package no.hvl.dat250.polls.models;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.ManyToOne;
+
+/**
+ * VoteOption
+ */
+@Entity
+public class VoteOption implements Serializable {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    private String caption; 
+    private int presentationOrder;
+
+    @OneToMany(mappedBy = "voteOption", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.EAGER)
+    @JsonManagedReference(value = "votes-voteOption")
+    private List<Vote> votes;
+
+    @ManyToOne
+    @JsonBackReference(value = "voteOption-Poll")
+    private Poll poll;
+
+    public VoteOption(){}
+
+    public VoteOption(String caption, int presentationOrder){
+        this.caption = caption;
+        this.presentationOrder = presentationOrder;
+        this.votes = new ArrayList<>();
+    }
+
+
+    public Long getId() {
+        return id;
+    }
+
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+
+    public String getCaption() {
+        return caption;
+    }
+
+
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
+
+
+    public int getPresentationOrder() {
+        return presentationOrder;
+    }
+
+
+    public void setPresentationOrder(int presentationOrder) {
+        this.presentationOrder = presentationOrder;
+    }
+
+
+    public List<Vote> getVotes() {
+        return votes;
+    }
+
+
+    public void setVotes(List<Vote> votes) {
+        this.votes = votes;
+    }
+
+    public Poll getPoll() {
+        return poll;
+    }
+
+
+    public void setPoll(Poll poll) {
+        this.poll = poll;
+    }
+
+    @JsonProperty("pollId")
+    public Long getPollId() {
+        return poll != null ? poll.getId() : null;
+    }
+
+    @Override
+    public String toString(){
+        return "VoteOption{" +
+            "id=" + id +
+            ", caption='" + caption + '\'' +
+            ", presentationOrder=" + presentationOrder +
+            ", poll=" + (poll != null ? poll.getId() : "null") +
+            ", pollId =" + (getPollId() != null ? getPollId() : "null") +
+            '}';
+    }
+
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        VoteOption that = (VoteOption) o;
+        return this.getId() == that.getId();
+    }
+}
+package no.hvl.dat250.polls.models;
+
+import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.TemporalAmount;
+import java.util.List;
+import java.util.Objects;
+import java.util.UUID;
+
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+
+/**
+ * guestUser
+ */
+@Entity
+public class guestUser {
+
+    private final static TemporalAmount STANDARD_DURATION_HOURS = Duration.ofHours(3);
+
+    @Id
+    private String guestId;
+    private Instant validUntil;
+
+    @OneToMany(mappedBy = "guest")
+    @JsonBackReference(value = "votes-guest")
+    private List<Vote> votes;
+
+	public guestUser(){
+        this.guestId = generateGuestId();
+        this.validUntil = Instant.now().plus(STANDARD_DURATION_HOURS);
+    }
+
+    private String generateGuestId(){
+        return UUID.randomUUID().toString();
+    }
+
+    /**
+     *Extends the validUntil of the guest user by STANDARD_DURATION_HOURS(3)
+     */
+    public void extendValidUntil(){
+        this.validUntil = Instant.now().plus(STANDARD_DURATION_HOURS);
+    }
+
+    public List<Vote> getVotes() {
+        return votes;
+    }
+
+    public void setVotes(List<Vote> votes) {
+        this.votes = votes;
+    }
+
+    public void setValidUntil(Instant newValidUntil){
+        this.validUntil = newValidUntil;
+    }
+
+    public Instant getValidUntil(){
+        return this.validUntil;
+    }
+
+    public String getGuestId(){
+        return this.guestId;
+    }
+
+    public void setGuestId(String newId){
+        this.guestId = newId;
+    }
+
+     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        guestUser guestUser = (guestUser) o;
+        return Objects.equals(guestId, guestUser.guestId);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(guestId);
+    }
+
+    @Override
+    public String toString() {
+        return "guestUser{" +
+                "guestId='" + guestId + '\'' +
+                ", validUntil=" + validUntil +
+                ", votes=" + votes +
+                '}';
+    }
+}

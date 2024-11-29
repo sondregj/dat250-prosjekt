@@ -6,7 +6,9 @@ HELP.md
 *.db
 sh/
 build/
+node_modules/
 sh/
+node_modules/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/

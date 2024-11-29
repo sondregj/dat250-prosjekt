@@ -1,16 +1,21 @@
 package no.hvl.dat250.polls.Services;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import no.hvl.dat250.polls.Repository.PollRepository;
 import no.hvl.dat250.polls.Repository.UserRepository;
+import no.hvl.dat250.polls.Repository.VoteOptionRepository;
+import no.hvl.dat250.polls.Repository.VoteRepository;
 import no.hvl.dat250.polls.models.Poll;
 import no.hvl.dat250.polls.models.User;
+import no.hvl.dat250.polls.models.Vote;
 import no.hvl.dat250.polls.models.VoteOption;
 
 /**
@@ -23,11 +28,14 @@ public class PollService {
    @Autowired
    private PollRepository repo;
    @Autowired UserRepository uRepo;
+   @Autowired VoteOptionRepository voRepo;
+   @Autowired EntityManager manager;
 
    /**
     * @param id The id of the Poll you want to retrieve
     * @return The poll with the given id as an optional or an empty Optional if no poll exists
     */
+   @Transactional 
    public Optional<Poll> getPollById(Long id){  
        return repo.findById(id);
    } 
@@ -84,10 +92,46 @@ public class PollService {
     */
    @Transactional
    public boolean deletePoll(Poll poll){
-       repo.delete(poll);
-       poll.getCreator().getCreatedPolls().remove(poll);
-       uRepo.save(poll.getCreator());
-       return repo.findById(poll.getId()).isEmpty();
+       try {
+           poll.getCreator().getCreatedPolls().remove(poll);
+           System.out.println("Poll creator cleaned");
+
+           uRepo.save(poll.getCreator());
+           System.out.println("Saved creator");
+           manager.flush();
+           manager.clear();
+
+           repo.delete(poll);
+           System.out.println("repo delete ran");
+
+           return repo.findById(poll.getId()).isEmpty();
+       } catch (Exception e) {
+           e.printStackTrace();
+           return false;
+       }
+   }
+
+   /**
+    *@param username the username for the user whos polls you want to retrieve
+    *@return all the polls created by the given user
+    */
+   @Transactional
+   public List<Poll> getPollsByUserName(String username){
+        Optional<User> retrievedUser = uRepo.findByUsername(username);
+        if (retrievedUser.isEmpty()){
+            return new ArrayList<>();
+        }
+        List<Poll> retrievedPolls = repo.findPollsByCreator(retrievedUser.get());
+        return retrievedPolls;
+   }
+
+   @Transactional
+   public Optional<Poll> getPollByVoteOption(VoteOption voteOption){
+       List<Poll> allPolls = repo.findAll();
+       Optional<Poll> retrievedPoll = allPolls.stream()
+           .filter(p -> p.getVoteOptions().contains(voteOption))
+           .findAny();
+       return retrievedPoll;
    }
 
    /**
@@ -130,11 +174,24 @@ public class PollService {
    @Transactional
    public Poll addPoll(Poll poll){
        if (poll.getVoteOptions() != null && !poll.getVoteOptions().isEmpty()){
-           poll.getVoteOptionMutable().forEach(vo -> {
+           poll.getVoteOptions().forEach(vo -> {
                vo.setPoll(poll);
            });
        }
        Poll savedPoll = repo.save(poll);
        return savedPoll;
    }
+
+   @Transactional
+   public Optional<Poll> getPollByVote(Vote vote){
+       manager.flush();
+       manager.clear();
+       Optional<VoteOption> retrievedOption = voRepo.findById(vote.getVoteOption().getId());
+       if (retrievedOption.isEmpty()){
+           return Optional.empty();
+       }
+       return Optional.of(retrievedOption.get().getPoll());
+   }
+
 }
+

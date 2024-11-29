@@ -1,5 +1,6 @@
 package no.hvl.dat250.polls.controllers;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +16,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import no.hvl.dat250.polls.Error.OperationFailedError;
-import no.hvl.dat250.polls.Error.ResourceNotFoundException;
+import no.hvl.dat250.polls.Error.CommonErrors;
 import no.hvl.dat250.polls.Services.GuestUserService;
+import no.hvl.dat250.polls.Services.PollService;
 import no.hvl.dat250.polls.Services.UserService;
 import no.hvl.dat250.polls.Services.VoteOptionService;
 import no.hvl.dat250.polls.Services.VoteService;
+import no.hvl.dat250.polls.messagingrabbitmq.PollProducer;
+import no.hvl.dat250.polls.models.Poll;
 import no.hvl.dat250.polls.models.User;
 import no.hvl.dat250.polls.models.Vote;
 import no.hvl.dat250.polls.models.guestUser;
@@ -34,124 +36,183 @@ import no.hvl.dat250.polls.models.guestUser;
 @RequestMapping("/api/votes")
 public class VoteController {
 
-
     @Autowired VoteService service;
     @Autowired UserService userService;
     @Autowired VoteOptionService voService;
     @Autowired GuestUserService guService;
+    @Autowired PollService pService;
+    @Autowired PollProducer producer;
+        
 
-    // @GetMapping
-    // public ResponseEntity<List<Vote>> getAllVotes(){
-    //     List<Vote> allVotes = service.getAllVotes();
-    //     if (allVotes == null || allVotes.isEmpty()){
-    //         return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    //     }
-    //     return new ResponseEntity<>(allVotes, HttpStatus.OK);
-    // }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Vote> getVoteById(@PathVariable("id") Long id){
+    public ResponseEntity<?> getVoteById(@PathVariable("id") Long id){
         Optional<Vote> retrievedVote = service.getVoteById(id);
         if (retrievedVote.isEmpty()){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(
+                    CommonErrors.VOTE_NOT_FOUND,
+                    HttpStatus.NOT_FOUND
+                    );
         }
         return new ResponseEntity<>(retrievedVote.get(), HttpStatus.OK);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Vote> removeVote(@PathVariable("id") Long id,
+    public ResponseEntity<?> removeVote(@PathVariable("id") Long id,
             @RequestHeader(value = "GuestId", required = false) String guestId,
             Authentication authentication){
-
         if (authentication == null && guestId == null){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(CommonErrors.NOT_AUTHORIZED, 
+                    HttpStatus.BAD_REQUEST);
         }
 
-        Vote vote = service.getVoteById(id)
-            .orElseThrow(() -> new ResourceNotFoundException("Vote not found"));
+        Optional<Vote> voteOPT = service.getVoteById(id);
+        if (voteOPT.isEmpty()){
+            return new ResponseEntity<>(CommonErrors.VOTE_NOT_FOUND,
+                    HttpStatus.NOT_FOUND);
+        }
+
+        Vote vote = voteOPT.get();
 
         if (authentication != null){
             Jwt token = (Jwt) authentication.getPrincipal();
             String username = token.getClaimAsString("sub");
-            User user = userService.getUserByUsername(username)
-                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+            Optional<User> userOPT = userService.getUserByUsername(username);
+            if (userOPT.isEmpty()){
+                return new ResponseEntity<>(CommonErrors.USER_NOT_FOUND,
+                        HttpStatus.NOT_FOUND);
+            }
+            User user = userOPT.get();
             if (!vote.getUser().equals(user)){
-                return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+                return new ResponseEntity<>(
+                        CommonErrors.WRONG_USER,
+                        HttpStatus.FORBIDDEN);
             }
         } else {
-            guestUser guest = guService.getCheckAndExtendById(guestId)
-                .orElseThrow(() -> new ResourceNotFoundException("Guest user not found or expired"));
+            Optional<guestUser> guestOPT = guService.getCheckAndExtendById(guestId);
+            if (guestOPT.isEmpty()){
+                return new ResponseEntity<>(
+                        CommonErrors.USER_NOT_FOUND,
+                        HttpStatus.BAD_REQUEST
+                        );
+            }
+            guestUser guest = guestOPT.get();
             if (!vote.getGuest().equals(guest)){
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(
+                        CommonErrors.WRONG_USER,
+                        HttpStatus.FORBIDDEN
+                        );
             }
         }
 
-       if (!service.deleteVoteById(id)){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-       }
-       return new ResponseEntity<>(vote,HttpStatus.OK);
+        Optional<Poll> retrievedPoll = pService.getPollByVote(vote);
+        if (!service.deleteVoteById(id)){
+            return new ResponseEntity<>(
+                    CommonErrors.NOT_DELETED,
+                    HttpStatus.INTERNAL_SERVER_ERROR
+                    );
+        }
+        if (retrievedPoll.isEmpty()){
+            return new ResponseEntity<>(CommonErrors.POLL_NOT_FOUND,
+                    HttpStatus.CONFLICT);
+        }
+        producer.send(retrievedPoll.get());
+        return new ResponseEntity<>(vote,HttpStatus.OK);
     }
 
     @PostMapping
     public ResponseEntity<?> createVote(@RequestBody Vote createdVote,
-            @RequestHeader(value = "GuestId", required = false) 
-            String guestId,
+            @RequestHeader (value = "GuestId", required = false)
+            String guestId, 
             Authentication authentication){
-        //Checks that there is some form of authentication
+        //Check if the request is authenticated as either guest or user
         if (authentication == null && guestId == null){
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(
+                    HttpStatus.FORBIDDEN);
         }
-        //Handles the request if the auth is a JWT token
+        //Handle if the user is logged in 
         if (authentication != null){
-            Jwt token = (Jwt) authentication.getPrincipal();
-            String username = token.getClaimAsString("sub");
-            Optional<User> userOpt = userService.getUserByUsername(username);
-            if (userOpt.isEmpty()){
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ResourceNotFoundException("Could not find user with username: " + username));
+            //authenticate login
+            Optional<User> userOPT = authenticateUser(authentication);
+            if (userOPT.isEmpty()){
+                return new ResponseEntity<>(CommonErrors.USER_NOT_FOUND,
+                        HttpStatus.FORBIDDEN);
             }
-            User user = userOpt.get();
-            createdVote.setUser(user);
-            Optional<Vote> existingVote = service.findUserVoteOnPoll(user, createdVote);
-            //If the user already has a vote on this poll
-            if (existingVote.isPresent()){
-                Vote oldVote = existingVote.get();
-                Vote vote = service.updateVote(oldVote.getId(), createdVote)
-                    .orElseThrow(() -> new OperationFailedError("Could not update Vote"));
-                return new ResponseEntity<>(vote, HttpStatus.CREATED);
+            User user = userOPT.get();
+            //Handle vote for a logged in user
+            Optional<Vote> vote = service.handleUserVote(user, createdVote);
+            if (vote.isEmpty()){
+                return new ResponseEntity<>(CommonErrors.COULD_NOT_VOTE,
+                        HttpStatus.CONFLICT);
             }
-            //Handles the request if the authentication is a guest-id header
-        } else {
-            Optional<guestUser> guestUser = guService.getCheckAndExtendById(guestId);
-            if (guestUser.isEmpty()){
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                        new ResourceNotFoundException("Guest user not found or expired")
-                        );
+            System.out.println("Før henting av poll");
+            Optional<Poll> retrievedPoll = pService.getPollByVote(vote.get());
+            System.out.println("Etter henting av poll");
+            if (retrievedPoll.isEmpty()){
+                return new ResponseEntity<>(CommonErrors.POLL_NOT_FOUND,
+                        HttpStatus.CONFLICT);
             }
-            guestUser guest = guestUser.get();
-            createdVote.setGuest(guest);
-            Optional<Vote> existingVote = service.findGuestVoteOnPoll(guest, createdVote);
-            //If the guestid already has a vote on this poll
-            if (existingVote.isPresent()){
-                Vote oldVote = existingVote.get();
-                Vote vote = service.updateVote(oldVote.getId(), createdVote)
-                    .orElseThrow(() -> new OperationFailedError("Could not update Vote"));
-                return new ResponseEntity<>(vote, HttpStatus.CREATED);
+            System.out.println("Før sending av poll");
+            producer.send(retrievedPoll.get());
+            System.out.println("Etter sending av poll");
+            return new ResponseEntity<>(vote.get(), HttpStatus.OK);
+        }else
+            //Handle if guestUser
+        {
+            //authenticate guestuser
+            Optional<guestUser> guestOPT = guService.getGuestById(guestId);
+            if (guestOPT.isEmpty()){
+                return new ResponseEntity<>(CommonErrors.USER_NOT_FOUND,
+                        HttpStatus.FORBIDDEN);
             }
+            guestUser guest = guestOPT.get();
+            //Handle GuestVoting
+            Optional<Vote> vote = service.handleGuestVote(guest, createdVote);
+            if (vote.isEmpty()){
+                return new ResponseEntity<>(CommonErrors.COULD_NOT_VOTE,
+                        HttpStatus.CONFLICT);
+            }
+            System.out.println("Før henting av poll");
+            Optional<Poll> retrievedPoll = pService.getPollByVote(vote.get());
+            System.out.println("Etter henting av poll");
+            if (retrievedPoll.isEmpty()){
+                return new ResponseEntity<>(CommonErrors.POLL_NOT_FOUND,
+                        HttpStatus.CONFLICT);
+            }
+            System.out.println("Før sending av poll");
+            producer.send(retrievedPoll.get());
+            System.out.println("Etter sending av poll");
+            return new ResponseEntity<>(vote.get(), HttpStatus.OK);
+
         }
-
-        Vote vote = service.addVote(createdVote);
-        return new ResponseEntity<>(vote, HttpStatus.CREATED);
             }
 
 
-    // @PutMapping("/{id}")
-    // public ResponseEntity<Vote> updateVote(@PathVariable("id") Long id,
-    //         @RequestBody Vote updatedVote){
-    //     Optional<Vote> updated = service.updateVote(id, updatedVote);
-    //     if (updated.isEmpty()){
-    //         return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-    //     }
-    //     return new ResponseEntity<>(updated.get(), HttpStatus.OK);
-    // }
-}
+    @GetMapping
+    public ResponseEntity<?> getVotesByUser(Authentication authentication){
+       if (authentication == null){
+           return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+       } 
+       Jwt token = (Jwt) authentication.getPrincipal();
+       String username = token.getClaimAsString("sub");
+       List<Vote> castedVotes = service.getVotesByUser(username);
+        if (castedVotes.isEmpty()){
+            return new ResponseEntity<>(
+                    CommonErrors.POLL_NOT_FOUND,
+                    HttpStatus.NO_CONTENT
+                    );
+        }
+       return new ResponseEntity<>(castedVotes, HttpStatus.OK);
+    }
+
+
+
+
+    private Optional<User> authenticateUser(Authentication authentication){
+        Jwt token = (Jwt) authentication.getPrincipal();
+        String username = token.getClaimAsString("sub");
+        Optional<User> retrievedUser = userService.getUserByUsername(username);
+        return retrievedUser;
+    }
+
+    }
